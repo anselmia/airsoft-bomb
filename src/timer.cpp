@@ -26,6 +26,31 @@ void TIMER::updateTime()
         secs = 0;
 }
 
+void TIMER::increase_min()
+{
+    mins += 1;
+    if (mins > 60)
+        mins = 0;
+}
+void TIMER::decrease_min()
+{
+    mins -= 1;
+    if (mins < 0)
+        mins = 60;
+}
+void TIMER::increase_sec()
+{
+    secs += 15;
+    if (secs > 60)
+        secs = 0;
+}
+void TIMER::decrease_sec()
+{
+    secs -= 15;
+    if (secs < 0)
+        mins = 60;
+}
+
 void TIMER::penalty()
 {
     timer_step = timer_step / 2;

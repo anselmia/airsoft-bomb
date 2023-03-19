@@ -2,7 +2,7 @@
 #define MODE_WIRE_h
 #include <Arduino.h>
 #include "defuse_wire.h"
-#include <algorithm>
+#include "timer.h"
 
 static const int dif_wire[4] = {0, 1, 2, 3};
 static const int time_penalty[3] = {4, 5, 6};
@@ -15,6 +15,8 @@ static const byte BOOM = 2;
 class MODE_WIRE
 {
 private:
+    void get_wire_usage(DEFUSE_WIRE wire);
+
 public:
     MODE_WIRE(DEFUSE_WIRE (&wires)[8]);
     bool boom;
@@ -22,7 +24,7 @@ public:
     int wires_diffused;
     bool diffused;
     void Diffuse();
-    void get_wire_usage(DEFUSE_WIRE wire);
+    void disconect_cable(DEFUSE_WIRE wire, TIMER &timer);
 };
 
 #endif
