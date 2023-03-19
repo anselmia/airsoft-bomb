@@ -3,21 +3,17 @@
 
 TIMER::TIMER(int sec, int min)
 {
-    decrement = 1;
+    timer_step = 1000;
     secs = sec;
     mins = min;
 }
 
 void TIMER::updateTime()
 {
-    // obtain seconds from arduino time
-    currmillis = (millis() / 1000.0); // currmilis== current milliseconds
-
-    if (currmillis > prevMillis)
-    {
+    currmillis = millis();
+    if (currmillis - prevMillis > timer_step)
         prevMillis = currmillis;
-        secs -= decrement;
-    }
+
     if (secs <= 0 && mins > 0)
     {
         secs = 59;
@@ -32,7 +28,7 @@ void TIMER::updateTime()
 
 void TIMER::penalty()
 {
-    decrement++;
+    timer_step = timer_step / 2;
     int min_to_sec = (mins * 60) + secs;
     int penalty = min_to_sec / 2;
     min_to_sec = min_to_sec - penalty;
