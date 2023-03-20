@@ -14,3 +14,4 @@ public:
     bool diffused;
     void Diffuse();
 };
+#endif
