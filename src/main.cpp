@@ -9,6 +9,7 @@
 #include "key.h"
 #include "menu.h"
 #include "bomb.h"
+#include "mode_code.h"
 
 const int pin_plant = 13;
 
@@ -61,6 +62,7 @@ BOMB bomb = BOMB();
 
 // Game Mode
 MODE_WIRE mode_wire = MODE_WIRE(wires);
+MODE_CODE mode_code = MODE_CODE();
 
 // Other
 char buf[10];
@@ -135,6 +137,22 @@ void wire_mode()
 
 void code_mode()
 {
+  if (bomb.state == PLANTED)
+  {
+    if (mode_code.boom == false || mode_code.diffused == false)
+    {
+      menu.timer.updateTime();
+
+      if (menu.input_code[menu.cursorPos] == menu.bombe_code[menu.cursorPos])
+      {
+        menu.cursorPos++;
+      }
+      else
+      {
+        menu.timer.penalty
+      }
+    }
+  }
 }
 
 void wire_mode_screen()
@@ -242,6 +260,7 @@ void code_mode_screen()
   display.display();
 }
 
+// for testing; to remove
 void select()
 {
   byte selectedButton;
