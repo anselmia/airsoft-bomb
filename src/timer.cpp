@@ -51,11 +51,15 @@ void TIMER::decrease_sec()
         mins = 60;
 }
 
-void TIMER::penalty()
+void TIMER::step_penalty(int divider)
 {
-    timer_step = timer_step / 2;
+    timer_step = timer_step / divider;
+}
+
+void TIMER::time_penalty(int divider)
+{
     int min_to_sec = (mins * 60) + secs;
-    int penalty = min_to_sec / 2;
+    int penalty = min_to_sec / divider;
     min_to_sec = min_to_sec - penalty;
     secs = min_to_sec % 60;
     mins = min_to_sec / 60;

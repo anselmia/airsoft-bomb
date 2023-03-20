@@ -8,7 +8,7 @@ MENU::MENU()
     cursorPos = 0;
 }
 
-void MENU::select_action(int key)
+void MENU::select_action(int key, BOMB &bomb)
 {
     switch (actualScreen)
     {
@@ -80,7 +80,7 @@ void MENU::select_action(int key)
             case 1:
                 actualScreen = 0;
                 cursorPos = 0;
-                reset_game();
+                reset_game(bomb);
                 break;
             case 2:
                 actualScreen = 3;
@@ -108,12 +108,18 @@ void MENU::select_action(int key)
         case but_C:
         case but_D:
             if (game_mode == 2)
-                input_code[cursorPos] = key;
+            {
+                if (key != bomb.input_code[cursorPos])
+                {
+                    bomb.input_code[cursorPos] = key;
+                    bomb.input_try = true;
+                }
+            }
             break;
         case but_hash:
             actualScreen = 0;
             cursorPos = 0;
-            reset_game();
+            reset_game(bomb);
             break;
         }
         break;
@@ -133,20 +139,20 @@ void MENU::select_action(int key)
         case but_A:
         case but_B:
         case but_C:
-            bombe_code[cursorPos] = key;
+            bomb.bombe_code[cursorPos] = key;
             break;
         case but_star:
             actualScreen = 1;
             cursorPos = 0;
             break;
         case but_hash:
-            reset_game();
+            reset_game(bomb);
         }
         break;
     }
 }
 
-void MENU::reset_game()
+void MENU::reset_game(BOMB &bomb)
 {
     game_mode = 0;
     timer.mins = 20;

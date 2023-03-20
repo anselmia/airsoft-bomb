@@ -12,11 +12,14 @@ class BOMB
 {
 private:
     unsigned long currmillis;
-    unsigned long prevMillis;    
+    unsigned long prevMillis;
 
 public:
     BOMB();
+    char bombe_code[5] = "    ";
+    char input_code[5] = "    ";
     int planting_sec;
+    bool input_try = false;
     int state;
     void plant();
 };

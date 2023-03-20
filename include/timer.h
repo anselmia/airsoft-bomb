@@ -18,7 +18,8 @@ public:
     void decrease_min();
     void increase_sec();
     void decrease_sec();
-    void penalty();
+    void time_penalty(int divider);
+    void step_penalty(int divider);
     void boom();
 };
 #endif

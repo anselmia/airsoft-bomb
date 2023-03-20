@@ -14,10 +14,8 @@ public:
     int actualScreen;
     int actualLine;
     TIMER timer = TIMER(0, 20);
-    char bombe_code[5] = "    ";
-    char input_code[5] = "    ";
-    void select_action(int key);
+    void select_action(int key, BOMB &bomb);
     int cursorPos;
-    void reset_game();
+    void reset_game(BOMB &bomb);
 };
 #endif

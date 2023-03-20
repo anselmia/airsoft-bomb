@@ -29,21 +29,22 @@ MODE_WIRE::MODE_WIRE(DEFUSE_WIRE (&wires)[8])
     boom = false;
 }
 
-void MODE_WIRE::disconect_cable(DEFUSE_WIRE wire , TIMER &timer)
+void MODE_WIRE::disconect_cable(DEFUSE_WIRE wire, TIMER &timer)
 {
     get_wire_usage(wire);
     switch (action)
-          {
-          case DIFFUSE:
-            Diffuse();
-            break;
-          case PENALTY:
-            timer.penalty();
-            break;
-          case BOOM:
-            timer.boom();
-            break;
-          }
+    {
+    case DIFFUSE:
+        Diffuse();
+        break;
+    case PENALTY:
+        timer.time_penalty(2);
+        timer.step_penalty(2);
+        break;
+    case BOOM:
+        timer.boom();
+        break;
+    }
 }
 
 void MODE_WIRE::get_wire_usage(DEFUSE_WIRE wire)

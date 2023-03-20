@@ -3,7 +3,6 @@
 // Before to start verify all wire coonected
 MODE_CODE::MODE_CODE()
 {
-
     diffused = false;
     boom = false;
 }
