@@ -9,11 +9,7 @@ BUTTON::BUTTON(int pin)
 void BUTTON::readButton()
 {
     int selectedButton = digitalRead(buttonPin);
-    Serial.print("Pin ");
-    Serial.print(buttonPin);
-    Serial.print(" input state : ");
-    Serial.print(selectedButton);
-    Serial.println(F(""));
+
     switch (buttonState)
     {
     case NOT_PRESSED:

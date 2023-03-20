@@ -72,17 +72,20 @@ void setup()
   display.setTextSize(1);              // Normal 1:1 pixel scale
   display.setTextColor(SSD1306_WHITE); // Draw white text
 
-  if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
+  while (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
   {
     Serial.println(F("SSD1306 allocation failed"));
-    for (;;)
-      ; // Don't proceed, loop forever
   }
 
   delay(100);
 }
 
-void select_game_mode()
+void draw_cursor(int y)
+{
+  display.drawRect(0, y, 5, 8, SSD1306_WHITE);
+}
+
+void select_game_mode_screen()
 {
   display.clearDisplay();
   switch (menu.actualScreen)
@@ -91,9 +94,11 @@ void select_game_mode()
     display.setCursor(30, 0);
     display.println(F("MODE DE JEU"));
     display.println(F(""));
-    display.setCursor(5, 16);
+    display.setCursor(30, 16);
     display.println(F("Fils"));
+    display.setCursor(30, 24);
     display.println(F("Code"));
+    draw_cursor(menu.actualLine * 8 + 16);
     break;
   }
   display.display();
@@ -237,18 +242,27 @@ void code_mode_screen()
   display.display();
 }
 
+void select()
+{
+  byte selectedButton;
+  selectedButton = Serial.read();
+  Serial.println(selectedButton);
+  menu.select_action(selectedButton);
+}
+
 void loop()
 {
-  for (int i = 0; i < 16; i++)
-  {
-    keys[i].readButton();
-    if (keys[i].buttonState == PRESSED)
-    {
-      menu.select_action(keys[i].key);
-      break;
-    }
-  }
-
+  // for (int i = 0; i < 16; i++)
+  //{
+  //   keys[i].readButton();
+  //   if (keys[i].buttonState == PRESSED)
+  //   {
+  //     menu.select_action(keys[i].key);
+  //     break;
+  //   }
+  // }
+  Serial.println("LOOP");
+  select();
   button_plant.readButton();
   if (button_plant.buttonState == PRESSED && menu.actualScreen == 2 && (bomb.state == UNPLANTED || bomb.state == ONGOING))
     bomb.plant();
@@ -258,7 +272,7 @@ void loop()
   switch (menu.game_mode)
   {
   case 0:
-    select_game_mode();
+    select_game_mode_screen();
     break;
   case 1:
     wire_mode();

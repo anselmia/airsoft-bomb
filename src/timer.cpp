@@ -11,7 +11,7 @@ TIMER::TIMER(int sec, int min)
 void TIMER::updateTime()
 {
     currmillis = millis();
-    if (currmillis - prevMillis > timer_step)
+    if ((int)(currmillis - prevMillis) > timer_step)
         prevMillis = currmillis;
 
     if (secs <= 0 && mins > 0)
