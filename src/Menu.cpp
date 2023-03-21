@@ -157,12 +157,12 @@ void MENU::reset_game(BOMB &bomb)
     game_mode = 0;
     timer.mins = 20;
     timer.secs = 0;
-    bombe_code[0] = ' ';
-    bombe_code[1] = ' ';
-    bombe_code[2] = ' ';
-    bombe_code[3] = ' ';
-    input_code[0] = ' ';
-    input_code[1] = ' ';
-    input_code[2] = ' ';
-    input_code[3] = ' ';
+    bomb.bombe_code[0] = ' ';
+    bomb.bombe_code[1] = ' ';
+    bomb.bombe_code[2] = ' ';
+    bomb.bombe_code[3] = ' ';
+    bomb.input_code[0] = ' ';
+    bomb.input_code[1] = ' ';
+    bomb.input_code[2] = ' ';
+    bomb.input_code[3] = ' ';
 }
