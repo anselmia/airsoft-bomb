@@ -11,7 +11,6 @@
 #include "bomb.h"
 #include "mode_code.h"
 
-// Pin used to plant the bomb
 const int pin_plant = 13;
 
 // Input wires
@@ -24,18 +23,9 @@ const int wire_pin6 = 18;
 const int wire_pin7 = 19;
 const int wire_pin8 = 23;
 
-DEFUSE_WIRE wires[8] = {
-    DEFUSE_WIRE(wire_pin1, 1),
-    DEFUSE_WIRE(wire_pin2, 2),
-    DEFUSE_WIRE(wire_pin3, 3),
-    DEFUSE_WIRE(wire_pin4, 4),
-    DEFUSE_WIRE(wire_pin5, 5),
-    DEFUSE_WIRE(wire_pin6, 6),
-    DEFUSE_WIRE(wire_pin7, 7),
-    DEFUSE_WIRE(wire_pin8, 8)
-};
+DEFUSE_WIRE wires[8] = {DEFUSE_WIRE(wire_pin1, 1), DEFUSE_WIRE(wire_pin2, 2), DEFUSE_WIRE(wire_pin3, 3), DEFUSE_WIRE(wire_pin4, 4), DEFUSE_WIRE(wire_pin5, 5), DEFUSE_WIRE(wire_pin6, 6), DEFUSE_WIRE(wire_pin7, 7), DEFUSE_WIRE(wire_pin8, 8)};
 
-// Buttons from capacitive keypad
+// Buttons
 KEY keys[16] = {
     KEY(0),
     KEY(1),
@@ -72,6 +62,8 @@ BOMB bomb = BOMB();
 
 // Game Mode
 MODE_WIRE mode_wire = MODE_WIRE(wires);
+
+// Game Mode
 MODE_CODE mode_code = MODE_CODE();
 
 // Other
@@ -84,20 +76,17 @@ void setup()
   display.setTextSize(1);              // Normal 1:1 pixel scale
   display.setTextColor(SSD1306_WHITE); // Draw white text
 
-  while (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
+  if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
   {
     Serial.println(F("SSD1306 allocation failed"));
+    for (;;)
+      ; // Don't proceed, loop forever
   }
 
   delay(100);
 }
 
-void draw_cursor(int y)
-{
-  display.drawRect(0, y, 5, 8, SSD1306_WHITE);
-}
-
-void select_game_mode_screen()
+void select_game_mode()
 {
   display.clearDisplay();
   switch (menu.actualScreen)
@@ -106,11 +95,9 @@ void select_game_mode_screen()
     display.setCursor(30, 0);
     display.println(F("MODE DE JEU"));
     display.println(F(""));
-    display.setCursor(30, 16);
+    display.setCursor(5, 16);
     display.println(F("Fils"));
-    display.setCursor(30, 24);
     display.println(F("Code"));
-    draw_cursor(menu.actualLine * 8 + 16);
     break;
   }
   display.display();
@@ -120,9 +107,8 @@ void wire_mode()
 {
   if (bomb.state == PLANTED)
   {
-    if (mode_wire.boom == false || mode_wire.defused == true)
+    if (mode_wire.boom == false && mode_wire.defused == false)
     {
-      menu.timer.updateTime();
       for (int i = 0; i < 8; i++)
       {
         wires[i].readWire();
@@ -142,6 +128,7 @@ void wire_mode()
         bomb.state = DEFUSED;
       }
     }
+    menu.timer.updateTime();
   }
 }
 
@@ -149,18 +136,28 @@ void code_mode()
 {
   if (bomb.state == PLANTED)
   {
-    if (mode_code.boom == false || mode_code.defused == false)
+    if (mode_code.boom == false && mode_code.defused == false)
     {
-      menu.timer.updateTime();
-
-      if (menu.input_code[menu.cursorPos] == menu.bombe_code[menu.cursorPos])
+      if (bomb.bombe_code[menu.cursorPos] == bomb.input_code[menu.cursorPos])
       {
-        menu.cursorPos++;
+        menu.cursorPos += 1;
       }
       else
       {
-        menu.timer.penalty
+        if (bomb.input_try == true)
+          menu.timer.time_penalty(2);
       }
+      bomb.input_try = false;
+      if (menu.cursorPos == 4)
+      {
+        bomb.state = DEFUSED;
+      }
+      if (menu.timer.mins == 0 && menu.timer.secs == 0)
+      {
+        mode_code.boom = true;
+        bomb.state = EXPLODED;
+      }
+      menu.timer.updateTime();
     }
   }
 }
@@ -222,7 +219,7 @@ void code_mode_screen()
     display.println(F("CODE"));
     display.println(F(""));
     display.setCursor(30, 16);
-    sprintf(buf, "%d %d %d %d", menu.bombe_code[0], menu.bombe_code[1], menu.bombe_code[2], menu.bombe_code[3]);
+    sprintf(buf, "%d %d %d %d", bomb.bombe_code[0], bomb.bombe_code[1], bomb.bombe_code[2], bomb.bombe_code[3]);
     display.print(buf);
     display.setTextSize(1);
     break;
@@ -254,7 +251,7 @@ void code_mode_screen()
       sprintf(buf, "%02d:%02d", menu.timer.mins, menu.timer.secs);
       display.print(buf);
       display.println(F(""));
-      sprintf(buf, "%d %d %d %d", menu.input_code[0], menu.input_code[1], menu.input_code[2], menu.input_code[3]);
+      sprintf(buf, "%d %d %d %d", bomb.input_code[0], bomb.input_code[1], bomb.input_code[2], bomb.input_code[3]);
       display.print(buf);
       break;
     case DEFUSED:
@@ -270,28 +267,18 @@ void code_mode_screen()
   display.display();
 }
 
-// for testing; to remove
-void select()
-{
-  byte selectedButton;
-  selectedButton = Serial.read();
-  Serial.println(selectedButton);
-  menu.select_action(selectedButton);
-}
-
 void loop()
 {
-  // for (int i = 0; i < 16; i++)
-  //{
-  //   keys[i].readButton();
-  //   if (keys[i].buttonState == PRESSED)
-  //   {
-  //     menu.select_action(keys[i].key);
-  //     break;
-  //   }
-  // }
-  Serial.println("LOOP");
-  select();
+  for (int i = 0; i < 16; i++)
+  {
+    keys[i].readButton();
+    if (keys[i].buttonState == PRESSED)
+    {
+      menu.select_action(keys[i].key, bomb);
+      break;
+    }
+  }
+
   button_plant.readButton();
   if (button_plant.buttonState == PRESSED && menu.actualScreen == 2 && (bomb.state == UNPLANTED || bomb.state == ONGOING))
     bomb.plant();
@@ -301,7 +288,7 @@ void loop()
   switch (menu.game_mode)
   {
   case 0:
-    select_game_mode_screen();
+    select_game_mode();
     break;
   case 1:
     wire_mode();
