@@ -1,7 +1,7 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
+#include <U8glib.h>
 #include <Arduino.h>
 #include "button.h"
 #include "defuse_wire.h"
@@ -48,11 +48,7 @@ KEY keys[16] = {
 BUTTON button_plant = BUTTON(pin_plant);
 
 // 128*64 I2C Screen
-#define SCREEN_WIDTH 128    // OLED display width, in pixels
-#define SCREEN_HEIGHT 64    // OLED display height, in pixels
-#define OLED_RESET -1       // Reset pin # (or -1 if sharing Arduino reset pin)
-#define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+U8GLIB_ST7920_128X64_4X u8g(13, 11, 10);
 
 // Menu
 MENU menu = MENU();
@@ -73,34 +69,30 @@ void setup()
 {
   // put your setup code here, to run once:
   Serial.begin(115200);
-  display.setTextSize(1);              // Normal 1:1 pixel scale
-  display.setTextColor(SSD1306_WHITE); // Draw white text
+  u8g.setColorIndex(1);
 
-  if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
-  {
-    Serial.println(F("SSD1306 allocation failed"));
-    for (;;)
-      ; // Don't proceed, loop forever
-  }
+  DDRC |= _BV(2) | _BV(3); // POWER:Vcc Gnd
+  PORTC |= _BV(3);         // VCC PINC3
 
+  u8g.setCursorFont(u8g_font_cursor);
+  u8g.setCursorStyle(144);
   delay(100);
 }
 
 void select_game_mode()
 {
-  display.clearDisplay();
-  switch (menu.actualScreen)
-  {
-  case 0:
-    display.setCursor(30, 0);
-    display.println(F("MODE DE JEU"));
-    display.println(F(""));
-    display.setCursor(5, 16);
-    display.println(F("Fils"));
-    display.println(F("Code"));
-    break;
-  }
-  display.display();
+  u8g.drawStr(30, 11, F("MODE DE JEU"));
+  u8g.drawStr(30, 33, F("Fil"));
+  u8g.drawStr(30, 44, F("Code"));
+}
+
+void draw_cursor()
+{
+  u8g.enableCursor();
+  if (menu.actualLine == 0)
+    u8g.setCursorPos(12, 33 + 5);
+  else
+    u8g.setCursorPos(12, 44 + 5);
 }
 
 void wire_mode()
@@ -164,107 +156,95 @@ void code_mode()
 
 void wire_mode_screen()
 {
-  display.clearDisplay();
   switch (menu.actualScreen)
   {
   case 1:
-    display.setTextSize(2);
-    display.setCursor(60, 0);
-    display.println(F("TIMER"));
-    display.println(F(""));
-    display.setCursor(30, 16);
+    u8g.drawStr(34, 11, F("TIMER"));
     sprintf(buf, "%d:%d", menu.timer.mins, menu.timer.secs);
-    display.print(buf);
-    display.setTextSize(1);
+    u8g.drawStr(34, 33, buf);
     break;
   case 2:
-    display.setTextSize(2);
-    display.setCursor(40, 0);
-    display.println(F("Activation"));
-    display.println(F(""));
-    display.setCursor(20, 16);
+    u8g.drawStr(30, 11, F("BOMBE"));
     switch (bomb.state)
     {
     case UNPLANTED:
-      display.println(F("...EN ATTENTE..."));
+      u8g.drawStr(20, 33, F("...WAITING..."));
       break;
     case ONGOING:
-      display.println(F("...ARMEMENT..."));
+      u8g.drawStr(20, 33, F("...PLANTING..."));
       break;
     case PLANTED:
       sprintf(buf, "%02d:%02d", menu.timer.mins, menu.timer.secs);
-      display.print(buf);
+      u8g.drawStr(20, 33, buf);
       break;
     case DEFUSED:
-      display.print("Bombe désactivée");
+      u8g.drawStr(20, 33, F("DEFUSED"));
       break;
     case EXPLODED:
-      display.print("BOOOOOOOOOOOOM");
+      u8g.drawStr(20, 33, F("BOOOOOOOOOOOOM"));
       break;
     }
-    display.setTextSize(1);
     break;
   }
-  display.display();
 }
 
 void code_mode_screen()
 {
-  display.clearDisplay();
   switch (menu.actualScreen)
   {
   case 3:
-    display.setTextSize(2);
-    display.setCursor(60, 0);
-    display.println(F("CODE"));
-    display.println(F(""));
-    display.setCursor(30, 16);
+    u8g.drawStr(60, 11, F("CODE"));
     sprintf(buf, "%d %d %d %d", bomb.bombe_code[0], bomb.bombe_code[1], bomb.bombe_code[2], bomb.bombe_code[3]);
-    display.print(buf);
-    display.setTextSize(1);
+    u8g.drawStr(30, 33, buf);
     break;
   case 1:
-    display.setTextSize(2);
-    display.setCursor(60, 0);
-    display.println(F("TIMER"));
-    display.println(F(""));
-    display.setCursor(30, 16);
+    u8g.drawStr(34, 11, F("TIMER"));
     sprintf(buf, "%d:%d", menu.timer.mins, menu.timer.secs);
-    display.print(buf);
-    display.setTextSize(1);
+    u8g.drawStr(34, 33, buf);
     break;
   case 2:
-    display.setTextSize(2);
-    display.setCursor(40, 0);
-    display.println(F("Activation"));
-    display.println(F(""));
-    display.setCursor(20, 16);
+    u8g.drawStr(30, 11, F("BOMBE"));
     switch (bomb.state)
     {
     case UNPLANTED:
-      display.println(F("...EN ATTENTE..."));
+      u8g.drawStr(20, 33, F("...WAITING..."));
       break;
     case ONGOING:
-      display.println(F("...ARMEMENT..."));
+      u8g.drawStr(20, 33, F("...PLANTING..."));
       break;
     case PLANTED:
       sprintf(buf, "%02d:%02d", menu.timer.mins, menu.timer.secs);
-      display.print(buf);
-      display.println(F(""));
+      u8g.drawStr(20, 33, buf);
       sprintf(buf, "%d %d %d %d", bomb.input_code[0], bomb.input_code[1], bomb.input_code[2], bomb.input_code[3]);
-      display.print(buf);
+      u8g.drawStr(20, 55, buf);
       break;
     case DEFUSED:
-      display.print("Bombe désactivée");
+      u8g.drawStr(20, 33, F("DEFUSED"));
       break;
     case EXPLODED:
-      display.print("BOOOOOOOOOOOOM");
+      u8g.drawStr(20, 33, F("BOOOOOOOOOOOOM"));
       break;
     }
-    display.setTextSize(1);
     break;
   }
-  display.display();
+}
+
+void print_screen()
+{
+  switch (menu.game_mode)
+  {
+  case 0:
+    select_game_mode();
+    break;
+  case 1:
+    wire_mode();
+    wire_mode_screen();
+    break;
+  case 2:
+    code_mode();
+    code_mode_screen();
+    break;
+  }
 }
 
 void loop()
@@ -285,18 +265,9 @@ void loop()
   else
     bomb.planting_sec = 0;
 
-  switch (menu.game_mode)
+  u8g.firstPage(); // Select the first memory page of the scrren
+  do
   {
-  case 0:
-    select_game_mode();
-    break;
-  case 1:
-    wire_mode();
-    wire_mode_screen();
-    break;
-  case 2:
-    code_mode();
-    code_mode_screen();
-    break;
-  }
+    print_screen();
+  } while (u8g.nextPage()); // Select the next page
 }
