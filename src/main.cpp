@@ -49,7 +49,7 @@ BUTTON button_plant = BUTTON(pin_plant);
 
 // 128*64 I2C Screen
 U8GLIB_ST7920_128X64_4X u8g(13, 11, 10); // Arduino
-// U8GLIB_ST7920_128X64_4X u8g(13, 11, 10); // Arduino
+// U8GLIB_ST7920_128X64_4X u8g(13, 11, 10); // ESP 32 ?
 
 // Menu
 MENU menu = MENU();
@@ -71,10 +71,6 @@ void setup()
   // put your setup code here, to run once:
   Serial.begin(115200);
   u8g.setColorIndex(1);
-
-  DDRC |= _BV(2) | _BV(3); // POWER:Vcc Gnd
-  PORTC |= _BV(3);         // VCC PINC3
-
   u8g.setCursorFont(u8g_font_cursor);
   u8g.setCursorStyle(144);
   delay(100);
@@ -230,6 +226,11 @@ void code_mode_screen()
   }
 }
 
+void print_progress(int millis)
+{
+  u8g.drawBox(3, 50, map(millis(), bomb.plantmillis, bomb.plantmillis + 10000, 0, 125), 10);
+}
+
 void print_screen()
 {
   switch (menu.game_mode)
@@ -262,7 +263,10 @@ void loop()
 
   button_plant.readButton();
   if (button_plant.buttonState == PRESSED && menu.actualScreen == 2 && (bomb.state == UNPLANTED || bomb.state == ONGOING))
+  {
     bomb.plant();
+    print_progress();
+  }
   else
     bomb.planting_sec = 0;
 
