@@ -9,6 +9,8 @@ BOMB::BOMB()
 
 void BOMB::plant()
 {
+    if (planting_sec == 0)
+        plantmillis = millis();
     state = ONGOING;
     currmillis = (millis() / 1000.0); // currmilis== current milliseconds
 

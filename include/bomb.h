@@ -18,6 +18,7 @@ public:
     BOMB();
     char bombe_code[5] = "    ";
     char input_code[5] = "    ";
+    unsigned long plantmillis;
     int planting_sec;
     bool input_try = false;
     int state;
