@@ -48,7 +48,8 @@ KEY keys[16] = {
 BUTTON button_plant = BUTTON(pin_plant);
 
 // 128*64 I2C Screen
-U8GLIB_ST7920_128X64_4X u8g(13, 11, 10);
+U8GLIB_ST7920_128X64_4X u8g(13, 11, 10); // Arduino
+// U8GLIB_ST7920_128X64_4X u8g(13, 11, 10); // Arduino
 
 // Menu
 MENU menu = MENU();
