@@ -15,14 +15,14 @@ void MENU::select_action(int key, BOMB &bomb)
     case 0:
         switch (key)
         {
-        case but_2:
-        case but_8:
+        case key_2:
+        case key_8:
             if (actualLine == 0)
                 actualLine = 1;
             else
                 actualLine = 0;
             break;
-        case but_star:
+        case key_star:
             switch (actualLine)
             {
             case 0:
@@ -42,18 +42,7 @@ void MENU::select_action(int key, BOMB &bomb)
     case 1:
         switch (key)
         {
-        case but_2:
-            switch (cursorPos)
-            {
-            case 0:
-                timer.increase_min();
-                break;
-            case 1:
-                timer.increase_sec();
-                break;
-            }
-            break;
-        case but_8:
+        case key_2:
             switch (cursorPos)
             {
             case 0:
@@ -64,17 +53,30 @@ void MENU::select_action(int key, BOMB &bomb)
                 break;
             }
             break;
-        case but_4:
-        case but_6:
+        case key_8:
+            switch (cursorPos)
+            {
+            case 0:
+                timer.increase_min();
+                break;
+            case 1:
+                timer.increase_sec();
+                break;
+            }
+            break;
+        case key_4:
+        case key_6:
+            Serial.println("cursor");
             if (cursorPos == 0)
                 cursorPos = 1;
             else
                 cursorPos = 0;
-        case but_star:
+            break;
+        case key_star:
             actualScreen = 2;
             cursorPos = 0;
             break;
-        case but_hash:
+        case key_hash:
             switch (game_mode)
             {
             case 1:
@@ -93,20 +95,20 @@ void MENU::select_action(int key, BOMB &bomb)
     case 2:
         switch (key)
         {
-        case but_0:
-        case but_1:
-        case but_2:
-        case but_3:
-        case but_4:
-        case but_5:
-        case but_6:
-        case but_7:
-        case but_8:
-        case but_9:
-        case but_A:
-        case but_B:
-        case but_C:
-        case but_D:
+        case key_0:
+        case key_1:
+        case key_2:
+        case key_3:
+        case key_4:
+        case key_5:
+        case key_6:
+        case key_7:
+        case key_8:
+        case key_9:
+        case key_A:
+        case key_B:
+        case key_C:
+        case key_D:
             if (game_mode == 2)
             {
                 if (key != bomb.input_code[cursorPos])
@@ -116,7 +118,7 @@ void MENU::select_action(int key, BOMB &bomb)
                 }
             }
             break;
-        case but_hash:
+        case key_hash:
             actualScreen = 0;
             cursorPos = 0;
             reset_game(bomb);
@@ -126,26 +128,27 @@ void MENU::select_action(int key, BOMB &bomb)
     case 3:
         switch (key)
         {
-        case but_0:
-        case but_1:
-        case but_2:
-        case but_3:
-        case but_4:
-        case but_5:
-        case but_6:
-        case but_7:
-        case but_8:
-        case but_9:
-        case but_A:
-        case but_B:
-        case but_C:
+        case key_0:
+        case key_1:
+        case key_2:
+        case key_3:
+        case key_4:
+        case key_5:
+        case key_6:
+        case key_7:
+        case key_8:
+        case key_9:
+        case key_A:
+        case key_B:
+        case key_C:
             bomb.bombe_code[cursorPos] = key;
+            cursorPos++;
             break;
-        case but_star:
+        case key_star:
             actualScreen = 1;
             cursorPos = 0;
             break;
-        case but_hash:
+        case key_hash:
             reset_game(bomb);
         }
         break;
@@ -154,15 +157,21 @@ void MENU::select_action(int key, BOMB &bomb)
 
 void MENU::reset_game(BOMB &bomb)
 {
+    bomb.state = UNPLANTED;
+    bomb.boom = false;
+    bomb.defused = false;
+    bomb.planting_sec = 0;
+    bomb.plantmillis = 0;
     game_mode = 0;
     timer.mins = 20;
     timer.secs = 0;
-    bomb.bombe_code[0] = ' ';
-    bomb.bombe_code[1] = ' ';
-    bomb.bombe_code[2] = ' ';
-    bomb.bombe_code[3] = ' ';
-    bomb.input_code[0] = ' ';
-    bomb.input_code[1] = ' ';
-    bomb.input_code[2] = ' ';
-    bomb.input_code[3] = ' ';
+    actualLine = 0;
+    bomb.bombe_code[0] = '0';
+    bomb.bombe_code[1] = '0';
+    bomb.bombe_code[2] = '0';
+    bomb.bombe_code[3] = '0';
+    bomb.input_code[0] = '0';
+    bomb.input_code[1] = '0';
+    bomb.input_code[2] = '0';
+    bomb.input_code[3] = '0';
 }

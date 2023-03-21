@@ -11,6 +11,8 @@ DEFUSE_WIRE::DEFUSE_WIRE(int pin, int num_wire)
     used = false;
     wireState = DISCONNECTED;
     pinMode(pin, INPUT_PULLUP);
+
+    
 }
 
 void DEFUSE_WIRE::readWire()

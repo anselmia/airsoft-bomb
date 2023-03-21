@@ -25,8 +25,6 @@ MODE_WIRE::MODE_WIRE(DEFUSE_WIRE (&wires)[8])
     }
 
     wires_defused = 0;
-    defused = false;
-    boom = false;
 }
 
 void MODE_WIRE::disconnect_cable(DEFUSE_WIRE wire, TIMER &timer)
@@ -71,6 +69,4 @@ void MODE_WIRE::get_wire_usage(DEFUSE_WIRE wire)
 void MODE_WIRE::Defuse()
 {
     wires_defused++;
-    if (wires_defused == 4)
-        defused = true;
 }

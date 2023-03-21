@@ -19,10 +19,8 @@ private:
 
 public:
     MODE_WIRE(DEFUSE_WIRE (&wires)[8]);
-    bool boom;
     int action;
     int wires_defused;
-    bool defused;
     void Defuse();
     void disconnect_cable(DEFUSE_WIRE wire, TIMER &timer);
 };

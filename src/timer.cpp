@@ -11,8 +11,12 @@ TIMER::TIMER(int sec, int min)
 void TIMER::updateTime()
 {
     currmillis = millis();
+    Serial.println((int)(currmillis - prevMillis));
     if ((int)(currmillis - prevMillis) > timer_step)
+    {
         prevMillis = currmillis;
+        secs--;
+    }
 
     if (secs <= 0 && mins > 0)
     {
@@ -48,7 +52,7 @@ void TIMER::decrease_sec()
 {
     secs -= 15;
     if (secs < 0)
-        mins = 60;
+        secs = 60;
 }
 
 void TIMER::step_penalty(int divider)

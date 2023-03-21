@@ -16,8 +16,10 @@ private:
 
 public:
     BOMB();
-    char bombe_code[5] = "    ";
-    char input_code[5] = "    ";
+    bool defused;
+    bool boom;
+    char bombe_code[5] = {'0', '0', '0', '0'};
+    char input_code[5] = {'0', '0', '0', '0'};
     unsigned long plantmillis;
     int planting_sec;
     bool input_try = false;
