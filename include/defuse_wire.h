@@ -1,5 +1,5 @@
-#ifndef DIFUSE_WIRE_h
-#define DIFUSE_WIRE_h
+#ifndef DEFUSE_WIRE_h
+#define DEFUSE_WIRE_h
 #include <Arduino.h>
 
 static const byte DISCONNECTED = 0;

@@ -24,18 +24,18 @@ MODE_WIRE::MODE_WIRE(DEFUSE_WIRE (&wires)[8])
         wires[i].usage = newitem;
     }
 
-    wires_diffused = 0;
-    diffused = false;
+    wires_defused = 0;
+    defused = false;
     boom = false;
 }
 
-void MODE_WIRE::disconect_cable(DEFUSE_WIRE wire, TIMER &timer)
+void MODE_WIRE::disconnect_cable(DEFUSE_WIRE wire, TIMER &timer)
 {
     get_wire_usage(wire);
     switch (action)
     {
-    case DIFFUSE:
-        Diffuse();
+    case DEFUSE:
+        Defuse();
         break;
     case PENALTY:
         timer.time_penalty(2);
@@ -50,14 +50,14 @@ void MODE_WIRE::disconect_cable(DEFUSE_WIRE wire, TIMER &timer)
 void MODE_WIRE::get_wire_usage(DEFUSE_WIRE wire)
 {
     action = -1;
-    if (wire.usage == dif_wire[0])
-        action = DIFFUSE;
-    else if (wire.usage == dif_wire[1])
-        action = DIFFUSE;
-    else if (wire.usage == dif_wire[2])
-        action = DIFFUSE;
-    else if (wire.usage == dif_wire[3])
-        action = DIFFUSE;
+    if (wire.usage == defuse_wire[0])
+        action = DEFUSE;
+    else if (wire.usage == defuse_wire[1])
+        action = DEFUSE;
+    else if (wire.usage == defuse_wire[2])
+        action = DEFUSE;
+    else if (wire.usage == defuse_wire[3])
+        action = DEFUSE;
     else if (wire.usage == time_penalty[0])
         action = PENALTY;
     else if (wire.usage == time_penalty[1])
@@ -68,9 +68,9 @@ void MODE_WIRE::get_wire_usage(DEFUSE_WIRE wire)
         action = BOOM;
 }
 
-void MODE_WIRE::Diffuse()
+void MODE_WIRE::Defuse()
 {
-    wires_diffused++;
-    if (wires_diffused == 4)
-        diffused = true;
+    wires_defused++;
+    if (wires_defused == 4)
+        defused = true;
 }

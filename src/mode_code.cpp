@@ -3,10 +3,10 @@
 // Before to start verify all wire coonected
 MODE_CODE::MODE_CODE()
 {
-    diffused = false;
+    defused = false;
     boom = false;
 }
 
-void MODE_CODE::Diffuse()
+void MODE_CODE::Defuse()
 {
 }

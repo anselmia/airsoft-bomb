@@ -11,7 +11,7 @@ public:
     MODE_CODE();
     bool boom;
     int action;
-    bool diffused;
-    void Diffuse();
+    bool defused;
+    void Defuse();
 };
 #endif

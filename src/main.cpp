@@ -11,6 +11,7 @@
 #include "bomb.h"
 #include "mode_code.h"
 
+// Pin used to plant the bomb
 const int pin_plant = 13;
 
 // Input wires
@@ -23,9 +24,18 @@ const int wire_pin6 = 18;
 const int wire_pin7 = 19;
 const int wire_pin8 = 23;
 
-DEFUSE_WIRE wires[8] = {DEFUSE_WIRE(wire_pin1, 1), DEFUSE_WIRE(wire_pin2, 2), DEFUSE_WIRE(wire_pin3, 3), DEFUSE_WIRE(wire_pin4, 4), DEFUSE_WIRE(wire_pin5, 5), DEFUSE_WIRE(wire_pin6, 6), DEFUSE_WIRE(wire_pin7, 7), DEFUSE_WIRE(wire_pin8, 8)};
+DEFUSE_WIRE wires[8] = {
+    DEFUSE_WIRE(wire_pin1, 1),
+    DEFUSE_WIRE(wire_pin2, 2),
+    DEFUSE_WIRE(wire_pin3, 3),
+    DEFUSE_WIRE(wire_pin4, 4),
+    DEFUSE_WIRE(wire_pin5, 5),
+    DEFUSE_WIRE(wire_pin6, 6),
+    DEFUSE_WIRE(wire_pin7, 7),
+    DEFUSE_WIRE(wire_pin8, 8)
+};
 
-// Buttons
+// Buttons from capacitive keypad
 KEY keys[16] = {
     KEY(0),
     KEY(1),
@@ -110,7 +120,7 @@ void wire_mode()
 {
   if (bomb.state == PLANTED)
   {
-    if (mode_wire.boom == false || mode_wire.diffused == true)
+    if (mode_wire.boom == false || mode_wire.defused == true)
     {
       menu.timer.updateTime();
       for (int i = 0; i < 8; i++)
@@ -119,7 +129,7 @@ void wire_mode()
         if (wires[i].wireState == DISCONNECTED && wires[i].used == false)
         {
           wires[i].used = true;
-          mode_wire.disconect_cable(wires[i], menu.timer);
+          mode_wire.disconnect_cable(wires[i], menu.timer);
         }
       }
       if (menu.timer.mins == 0 && menu.timer.secs == 0)
@@ -127,9 +137,9 @@ void wire_mode()
         mode_wire.boom = true;
         bomb.state = EXPLODED;
       }
-      if (mode_wire.diffused == true)
+      if (mode_wire.defused == true)
       {
-        bomb.state = DIFFUSED;
+        bomb.state = DEFUSED;
       }
     }
   }
@@ -139,7 +149,7 @@ void code_mode()
 {
   if (bomb.state == PLANTED)
   {
-    if (mode_code.boom == false || mode_code.diffused == false)
+    if (mode_code.boom == false || mode_code.defused == false)
     {
       menu.timer.updateTime();
 
@@ -188,7 +198,7 @@ void wire_mode_screen()
       sprintf(buf, "%02d:%02d", menu.timer.mins, menu.timer.secs);
       display.print(buf);
       break;
-    case DIFFUSED:
+    case DEFUSED:
       display.print("Bombe désactivée");
       break;
     case EXPLODED:
@@ -247,7 +257,7 @@ void code_mode_screen()
       sprintf(buf, "%d %d %d %d", menu.input_code[0], menu.input_code[1], menu.input_code[2], menu.input_code[3]);
       display.print(buf);
       break;
-    case DIFFUSED:
+    case DEFUSED:
       display.print("Bombe désactivée");
       break;
     case EXPLODED:

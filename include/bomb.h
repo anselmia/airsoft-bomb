@@ -6,7 +6,7 @@ static const byte UNPLANTED = 0;
 static const byte ONGOING = 1;
 static const byte PLANTED = 2;
 static const byte EXPLODED = 3;
-static const byte DIFFUSED = 4;
+static const byte DEFUSED = 4;
 
 class BOMB
 {
