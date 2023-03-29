@@ -42,22 +42,22 @@ DEFUSE_WIRE wires[8] = {
 
 // Keys
 KEYS keys[16] = {
-    KEY(key_0),
-    KEY(key_1),
-    KEY(key_2),
-    KEY(key_3),
-    KEY(key_4),
-    KEY(key_5),
-    KEY(key_6),
-    KEY(key_7),
-    KEY(key_8),
-    KEY(key_9),
-    KEY(key_A),
-    KEY(key_B),
-    KEY(key_C),
-    KEY(key_D),
-    KEY(key_star),
-    KEY(key_hash),
+    KEYS(key_0),
+    KEYS(key_1),
+    KEYS(key_2),
+    KEYS(key_3),
+    KEYS(key_4),
+    KEYS(key_5),
+    KEYS(key_6),
+    KEYS(key_7),
+    KEYS(key_8),
+    KEYS(key_9),
+    KEYS(key_A),
+    KEYS(key_B),
+    KEYS(key_C),
+    KEYS(key_D),
+    KEYS(key_star),
+    KEYS(key_hash),
 };
 
 // Keypad
