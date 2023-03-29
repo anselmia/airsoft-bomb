@@ -1,7 +1,7 @@
 #include <SPI.h>
+#include "TTP229.h"
+#include <U8g2lib.h>
 #include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <U8glib.h>
 #include <Arduino.h>
 #include "button.h"
 #include "defuse_wire.h"
@@ -11,19 +11,27 @@
 #include "bomb.h"
 
 // const int pin_plant = 13;
-const int pin_plant = 2; // to remove
+const int pin_plant = 16; // to remove
 
-// Input wires
-const int wire_pin1 = 15;
-const int wire_pin2 = 4;
-const int wire_pin3 = 16;
+// Input wires ESP32
+const int wire_pin1 = 14;
+const int wire_pin2 = 27;
+const int wire_pin3 = 15;
 const int wire_pin4 = 17;
-const int wire_pin5 = 5;
-const int wire_pin6 = 18;
-const int wire_pin7 = 19;
-const int wire_pin8 = 23;
+const int wire_pin5 = 19;
+const int wire_pin6 = 35;
+const int wire_pin7 = 34;
+const int wire_pin8 = 26;
 
-DEFUSE_WIRE wires[8] = {DEFUSE_WIRE(wire_pin1, 1), DEFUSE_WIRE(wire_pin2, 2), DEFUSE_WIRE(wire_pin3, 3), DEFUSE_WIRE(wire_pin4, 4), DEFUSE_WIRE(wire_pin5, 5), DEFUSE_WIRE(wire_pin6, 6), DEFUSE_WIRE(wire_pin7, 7), DEFUSE_WIRE(wire_pin8, 8)};
+DEFUSE_WIRE wires[8] = {
+    DEFUSE_WIRE(wire_pin1, 1),
+    DEFUSE_WIRE(wire_pin2, 2),
+    DEFUSE_WIRE(wire_pin3, 3),
+    DEFUSE_WIRE(wire_pin4, 4),
+    DEFUSE_WIRE(wire_pin5, 5),
+    DEFUSE_WIRE(wire_pin6, 6),
+    DEFUSE_WIRE(wire_pin7, 7),
+    DEFUSE_WIRE(wire_pin8, 8)};
 
 // Buttons
 KEY keys[16] = {
@@ -45,11 +53,17 @@ KEY keys[16] = {
     KEY(key_hash),
 };
 
+// Keypad
+const int SCL_PIN = 12;
+const int SDO_PIN = 13;
+TTP229 ttp229 = TTP229(SCL_PIN, SDO_PIN);
+
 BUTTON button_plant = BUTTON(pin_plant);
 
 // 128*64 I2C Screen
-U8GLIB_ST7920_128X64_4X u8g(13, 11, 10); // Arduino
+// U8GLIB_ST7920_128X64_4X u8g(13, 11, 10); // Arduino
 // U8GLIB_ST7920_128X64_4X u8g(13, 11, 10); // ESP 32 ?
+U8G2_ST7565_JLX12864_1_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/18, /* data=*/23, /* cs=*/25, /* dc=*/33, /* reset=*/32); /// good
 
 // Menu
 MENU menu = MENU();
@@ -66,28 +80,29 @@ char buf[10];
 void setup()
 {
   // put your setup code here, to run once:
-  Serial.begin(9600);
-  u8g.setColorIndex(1);
-  u8g.setCursorFont(u8g_font_cursor);
-  u8g.setCursorStyle(144);
-  u8g.setFont(u8g_font_tpss);
+  Serial.begin(115200);
+  Wire.begin();
+  u8g2.begin();
+  u8g2.setColorIndex(1);
+  // u8g2.setCursorFont(u8g_font_cursor);
+  // u8g2.setCursorStyle(144);
+  u8g2.setFont(u8g2_font_5x7_tr);
   delay(100);
 }
 
 void draw_cursor()
 {
-  u8g.enableCursor();
   if (menu.actualLine == 0)
-    u8g.setCursorPos(12, 22 + 5);
+    u8g2.drawBox(12, 22, 5, 7);
   else
-    u8g.setCursorPos(12, 33 + 5);
+    u8g2.drawBox(12, 33, 5, 7);
 }
 
 void select_game_mode()
 {
-  u8g.drawStr(30, 11, F("MODE DE JEU"));
-  u8g.drawStr(30, 33, F("Fil"));
-  u8g.drawStr(30, 44, F("Code"));
+  u8g2.drawStr(30, 11, "MODE DE JEU");
+  u8g2.drawStr(30, 33, "Fil");
+  u8g2.drawStr(30, 44, "Code");
 
   draw_cursor();
 }
@@ -155,33 +170,32 @@ void code_mode()
 
 void wire_mode_screen()
 {
-  u8g.disableCursor();
   switch (menu.actualScreen)
   {
   case 1:
-    u8g.drawStr(50, 11, F("TIMER"));
+    u8g2.drawStr(50, 11, "TIMER");
     sprintf(buf, "%d:%d", menu.timer.mins, menu.timer.secs);
-    u8g.drawStr(48, 33, buf);
+    u8g2.drawStr(48, 33, buf);
     break;
   case 2:
-    u8g.drawStr(50, 11, F("BOMBE"));
+    u8g2.drawStr(50, 11, "BOMBE");
     switch (bomb.state)
     {
     case UNPLANTED:
-      u8g.drawStr(40, 33, F("...WAITING..."));
+      u8g2.drawStr(40, 33, "...WAITING...");
       break;
     case ONGOING:
-      u8g.drawStr(40, 33, F("...PLANTING..."));
+      u8g2.drawStr(40, 33, "...PLANTING...");
       break;
     case PLANTED:
       sprintf(buf, "%02d:%02d", menu.timer.mins, menu.timer.secs);
-      u8g.drawStr(40, 33, buf);
+      u8g2.drawStr(40, 33, buf);
       break;
     case DEFUSED:
-      u8g.drawStr(42, 33, F("DEFUSED"));
+      u8g2.drawStr(42, 33, "DEFUSED");
       break;
     case EXPLODED:
-      u8g.drawStr(20, 33, F("BOOOOOOOOOOOOM"));
+      u8g2.drawStr(20, 33, "BOOOOOOOOOOOOM");
       break;
     }
     break;
@@ -190,44 +204,43 @@ void wire_mode_screen()
 
 void code_mode_screen()
 {
-  u8g.disableCursor();
   switch (menu.actualScreen)
   {
   case 3:
-    u8g.drawStr(50, 11, F("CODE"));
-    sprintf(buf, "%c %c %c %c", bomb.bombe_code[0], bomb.bombe_code[1], bomb.bombe_code[2], bomb.bombe_code[3]);
-    u8g.drawStr(43, 33, buf);
+    u8g2.drawStr(50, 11, "CODE");
+    sprintf(buf, "%d %d %d %d", bomb.bombe_code[0], bomb.bombe_code[1], bomb.bombe_code[2], bomb.bombe_code[3]);
+    u8g2.drawStr(43, 33, buf);
     break;
   case 1:
-    u8g.drawStr(50, 11, F("TIMER"));
+    u8g2.drawStr(50, 11, "TIMER");
     sprintf(buf, "%02d:%02d", menu.timer.mins, menu.timer.secs);
-    u8g.drawStr(50, 33, buf);
+    u8g2.drawStr(50, 33, buf);
     break;
   case 2:
-    u8g.drawStr(50, 11, F("BOMBE"));
+    u8g2.drawStr(50, 11, "BOMBE");
     switch (bomb.state)
     {
     case UNPLANTED:
-      u8g.drawStr(33, 33, F("... WAITING ..."));
+      u8g2.drawStr(33, 33, "... WAITING ...");
       break;
     case ONGOING:
-      u8g.drawStr(30, 33, F("... PLANTING ..."));
+      u8g2.drawStr(30, 33, "... PLANTING ...");
       break;
     case PLANTED:
       sprintf(buf, "%02d:%02d", menu.timer.mins, menu.timer.secs);
-      u8g.drawStr(50, 33, buf);
-      sprintf(buf, "%c %c %c %c", bomb.input_code[0], bomb.input_code[1], bomb.input_code[2], bomb.input_code[3]);
-      u8g.drawStr(46, 55, buf);
+      u8g2.drawStr(50, 33, buf);
+      sprintf(buf, "%d %d %d %d", bomb.input_code[0], bomb.input_code[1], bomb.input_code[2], bomb.input_code[3]);
+      u8g2.drawStr(46, 55, buf);
       break;
     case DEFUSED:
-      sprintf(buf, "%c %c %c %c", bomb.input_code[0], bomb.input_code[1], bomb.input_code[2], bomb.input_code[3]);
-      u8g.drawStr(46, 55, buf);
-      u8g.drawStr(44, 33, F("DEFUSED"));
+      sprintf(buf, "%d %d %d %d", bomb.input_code[0], bomb.input_code[1], bomb.input_code[2], bomb.input_code[3]);
+      u8g2.drawStr(46, 55, buf);
+      u8g2.drawStr(44, 33, "DEFUSED");
       break;
     case EXPLODED:
-      sprintf(buf, "%c %c %c %c", bomb.input_code[0], bomb.input_code[1], bomb.input_code[2], bomb.input_code[3]);
-      u8g.drawStr(46, 55, buf);
-      u8g.drawStr(20, 33, F("BOOOOOOOOOOOOM"));
+      sprintf(buf, "%d %d %d %d", bomb.input_code[0], bomb.input_code[1], bomb.input_code[2], bomb.input_code[3]);
+      u8g2.drawStr(46, 55, buf);
+      u8g2.drawStr(20, 33, "BOOOOOOOOOOOOM");
       break;
     }
     break;
@@ -238,7 +251,7 @@ void print_progress()
 {
   Serial.println(bomb.plantmillis);
   Serial.println(millis());
-  u8g.drawBox(3, 40, map(millis(), bomb.plantmillis, bomb.plantmillis + 10000, 0, 125), 10);
+  u8g2.drawBox(3, 40, map(millis(), bomb.plantmillis, bomb.plantmillis + 10000, 0, 125), 10);
 }
 
 void print_screen()
@@ -261,16 +274,16 @@ void print_screen()
 
 void loop()
 {
-  int selectedkey = Serial.read();
+  uint8_t key = ttp229.GetKey16(); // Non Blocking
   for (int i = 0; i < 16; i++)
   {
-    keys[i].readButton(selectedkey);
-    if (keys[i].buttonState == PRESSED)
+    if (keys[i].key == key)
     {
       menu.select_action(keys[i].key, bomb);
       break;
     }
   }
+  ttp229.set_Key16_to_0();
 
   button_plant.readButton();
   if (button_plant.buttonState == PRESSED && menu.actualScreen == 2 && (bomb.state == UNPLANTED || bomb.state == ONGOING) && bomb.defused == false && bomb.boom == false)
@@ -287,9 +300,9 @@ void loop()
     }
   }
 
-  u8g.firstPage(); // Select the first memory page of the scrren
+  u8g2.firstPage(); // Select the first memory page of the scrren
   do
   {
     print_screen();
-  } while (u8g.nextPage()); // Select the next page
+  } while (u8g2.nextPage()); // Select the next page
 }
