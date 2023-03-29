@@ -12,6 +12,7 @@
 
 // const int pin_plant = 13;
 const int pin_plant = 16; // to remove
+const int pin_key = 3;
 
 // Input wires ESP32
 const int wire_pin1 = 15;
@@ -33,7 +34,7 @@ DEFUSE_WIRE wires[8] = {
     DEFUSE_WIRE(wire_pin7, 7),
     DEFUSE_WIRE(wire_pin8, 8)};
 
-// Buttons
+// Keys
 KEY keys[16] = {
     KEY(key_0),
     KEY(key_1),
@@ -58,6 +59,8 @@ const int SCL_PIN = 12;
 const int SDO_PIN = 13;
 TTP229 ttp229 = TTP229(SCL_PIN, SDO_PIN);
 
+// Buttons
+BUTTON button_plant = BUTTON(pin_plant);
 BUTTON button_plant = BUTTON(pin_plant);
 
 // 128*64 I2C Screen
@@ -100,11 +103,16 @@ void draw_cursor()
 
 void select_game_mode()
 {
-  u8g2.drawStr(30, 11, "MODE DE JEU");
-  u8g2.drawStr(30, 33, "Fil");
-  u8g2.drawStr(30, 44, "Code");
+  if (bomb.state == ARMED)
+    u8g2.drawStr(20, 11, F(" !!! BOMBE ARMEE !!!"));
+  else
+  {
+    u8g2.drawStr(30, 11, "MODE DE JEU");
+    u8g2.drawStr(30, 33, "Fil");
+    u8g2.drawStr(30, 44, "Code");
 
-  draw_cursor();
+    draw_cursor();
+  }
 }
 
 void wire_mode()
@@ -182,14 +190,27 @@ void wire_mode_screen()
     switch (bomb.state)
     {
     case UNPLANTED:
+      u8g2.drawStr(40, 33, "...NOT ARMED...");
+      break;
+    case ARMED:
       u8g2.drawStr(40, 33, "...WAITING...");
       break;
     case ONGOING:
-      u8g2.drawStr(40, 33, "...PLANTING...");
+      u8g.drawStr(30, 33, F("...PLANTING..."));
       break;
     case PLANTED:
       sprintf(buf, "%02d:%02d", menu.timer.mins, menu.timer.secs);
       u8g2.drawStr(40, 33, buf);
+      char wire_state[7];
+      for (int i = 0; i < 6; i++)
+      {
+        if (wires[i].used == true)
+          wire_state[i] = 'V';
+        else
+          wire_state[i] = 'X';
+      }
+      sprintf(buf, "%c %c %c %c %c %c %c %c", wire_state[0], wire_state[1], wire_state[2], wire_state[3], wire_state[4], wire_state[5], wire_state[6], wire_state[7]);
+      u8g.drawStr(25, 55, buf);
       break;
     case DEFUSED:
       u8g2.drawStr(42, 33, "DEFUSED");
@@ -221,7 +242,10 @@ void code_mode_screen()
     switch (bomb.state)
     {
     case UNPLANTED:
-      u8g2.drawStr(33, 33, "... WAITING ...");
+      u8g2.drawStr(33, 33, "... NOT ARMED ...");
+      break;
+    case ARMED:
+      u8g.drawStr(33, 33, F("... WAITING ..."));
       break;
     case ONGOING:
       u8g2.drawStr(30, 33, "... PLANTING ...");
@@ -272,33 +296,54 @@ void print_screen()
   }
 }
 
+void readButton(bool action)
+{
+  if (bomb.state < ARMED && action == false)
+  {
+    button_arm.readButton();
+    if (button_arm.buttonState == PRESSED)
+    {
+      bomb.state = ARMED;
+      action = true;
+    }
+  }
+
+  if (bomb.state == (bomb.state == ARMED || bomb.state == ONGOING) && action == false)
+  {
+    button_plant.readButton();
+
+    if (button_plant.buttonState == PRESSED && menu.actualScreen == 2 && bomb.defused == false && bomb.boom == false)
+    {
+      bomb.plant();
+      print_progress();
+    }
+    else
+    {
+      if (bomb.state == ONGOING && bomb.defused == false && bomb.boom == false)
+      {
+        bomb.planting_sec = 0;
+        bomb.state = UNPLANTED;
+      }
+    }
+  }
+}
+
 void loop()
 {
+  bool action = false;
   uint8_t key = ttp229.GetKey16(); // Non Blocking
   for (int i = 0; i < 16; i++)
   {
     if (keys[i].key == key)
     {
       menu.select_action(keys[i].key, bomb);
+      action = true;
       break;
     }
   }
   ttp229.set_Key16_to_0();
 
-  button_plant.readButton();
-  if (button_plant.buttonState == PRESSED && menu.actualScreen == 2 && (bomb.state == UNPLANTED || bomb.state == ONGOING) && bomb.defused == false && bomb.boom == false)
-  {
-    bomb.plant();
-    print_progress();
-  }
-  else
-  {
-    if (bomb.state == ONGOING && bomb.defused == false && bomb.boom == false)
-    {
-      bomb.planting_sec = 0;
-      bomb.state = UNPLANTED;
-    }
-  }
+  readButton(action);
 
   u8g2.firstPage(); // Select the first memory page of the scrren
   do

@@ -3,10 +3,11 @@
 #include <Arduino.h>
 
 static const byte UNPLANTED = 0;
-static const byte ONGOING = 1;
-static const byte PLANTED = 2;
-static const byte EXPLODED = 3;
-static const byte DEFUSED = 4;
+static const byte ARMED = 1;
+static const byte ONGOING = 2;
+static const byte PLANTED = 3;
+static const byte EXPLODED = 4;
+static const byte DEFUSED = 5;
 
 class BOMB
 {
