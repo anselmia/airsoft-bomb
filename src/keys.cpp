@@ -1,6 +1,6 @@
-#include "key.h"
+#include "keys.h"
 
-KEY::KEY(int k)
+KEYS::KEYS(int k)
 {
     key = k;
     buttonState = NOT_PRESSED;
@@ -17,7 +17,7 @@ KEY::KEY(int k)
 //        case NOT_PRESSED:
 //            buttonState = PUSHED;
 //        case PUSHED:
-//            buttonState = PRESSED;
+//            buttonState = KEY_PRESSED;
 //        }
 //    }
 //    else
@@ -28,7 +28,7 @@ KEY::KEY(int k)
 // void KEY::readButton(int selectedkey)
 //{
 //    if (key == selectedkey)
-//        buttonState = PRESSED;
+//        buttonState = KEY_PRESSED;
 //    else
 //        buttonState = NOT_PRESSED;
 //}

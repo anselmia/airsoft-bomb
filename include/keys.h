@@ -1,5 +1,5 @@
-#ifndef KEY_h
-#define KEY_h
+#ifndef KEYS_h
+#define KEYS_h
 #include "button.h"
 #include <Arduino.h>
 #include <Key.h>
@@ -9,7 +9,7 @@
 #define I2CADDR 0x26 // Set the Address of the PCF8574
 
 // Set the Key at Use (4x4)
-char layout[19] = "123A456B789C*0#DNF"; // N = NoKey, F = Fail
+char layout_keypad[19] = "123A456B789C*0#DNF"; // N = NoKey, F = Fail
 
 // Capacitive keypad
 static const byte key_0 = 14;
@@ -65,11 +65,11 @@ static const byte key_hash = 15;
 // static const byte key_star = 42;
 // static const byte key_hash = 47;
 
-class KEY
+class KEYS
 {
 private:
 public:
-    KEY(int k);
+    KEYS(int k);
     int key;
     byte buttonState;
     // void readButton(int selected_key);

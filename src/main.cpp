@@ -6,10 +6,10 @@
 #include "button.h"
 #include "defuse_wire.h"
 #include "mode_wire.h"
-#include "key.h"
+#include "keys.h"
 #include "menu.h"
 #include "bomb.h"
-
+#include "led.h"
 #include <I2CKeyPad.h>
 
 // const int pin_plant = 13;
@@ -26,8 +26,10 @@ const int wire_pin6 = 14;
 const int wire_pin7 = 27;
 const int wire_pin8 = 26;
 
+// Keypad
 I2CKeyPad keyPad(I2CADDR);
 
+// Defuse wire
 DEFUSE_WIRE wires[8] = {
     DEFUSE_WIRE(wire_pin1, 1),
     DEFUSE_WIRE(wire_pin2, 2),
@@ -39,7 +41,7 @@ DEFUSE_WIRE wires[8] = {
     DEFUSE_WIRE(wire_pin8, 8)};
 
 // Keys
-KEY keys[16] = {
+KEYS keys[16] = {
     KEY(key_0),
     KEY(key_1),
     KEY(key_2),
@@ -65,7 +67,7 @@ TTP229 ttp229 = TTP229(SCL_PIN, SDO_PIN);
 
 // Buttons
 BUTTON button_plant = BUTTON(pin_plant);
-BUTTON button_plant = BUTTON(pin_plant);
+BUTTON button_arm = BUTTON(pin_key);
 
 // 128*64 I2C Screen
 // U8GLIB_ST7920_128X64_4X u8g(13, 11, 10); // Arduino
@@ -97,7 +99,7 @@ void setup()
   //     ;
   // }
   //
-  // keyPad.loadKeyMap(layout);
+  // keyPad.loadKeyMap(layout_keypad);
   u8g2.begin();
   u8g2.setColorIndex(1);
   u8g2.setFont(u8g2_font_5x7_tr);
@@ -313,7 +315,7 @@ void readButton(bool action)
   if (bomb.state < ARMED && action == false)
   {
     button_arm.readButton();
-    if (button_arm.buttonState == PRESSED)
+    if (button_arm.buttonState == KEY_PRESSED)
     {
       bomb.state = ARMED;
       action = true;
@@ -324,7 +326,7 @@ void readButton(bool action)
   {
     button_plant.readButton();
 
-    if (button_plant.buttonState == PRESSED && menu.actualScreen == 2 && bomb.defused == false && bomb.boom == false)
+    if (button_plant.buttonState == KEY_PRESSED && menu.actualScreen == 2 && bomb.defused == false && bomb.boom == false)
     {
       bomb.plant();
       print_progress();
@@ -343,7 +345,7 @@ void readButton(bool action)
 void loop()
 {
   bool action = false;
-  uint8_t key = ttp229.GetKey16(); // Non Blocking
+  uint8_t key = ttp229.GetKey16(); // to remove
   // int key = keyPad.getChar();
   for (int i = 0; i < 16; i++)
   {

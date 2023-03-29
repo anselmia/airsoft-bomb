@@ -23,14 +23,14 @@ void BUTTON::readButton()
     case PUSHED:
         if (selectedButton == 0)
         {
-            buttonState = PRESSED;
+            buttonState = KEY_PRESSED;
         }
         else
         {
             buttonState = NOT_PRESSED;
         }
         break;
-    case PRESSED:
+    case KEY_PRESSED:
         if (selectedButton == 1)
         {
             buttonState = NOT_PRESSED;

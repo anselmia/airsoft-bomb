@@ -2,7 +2,7 @@
 #define MENU_h
 #include "timer.h"
 #include "Arduino.h"
-#include "key.h"
+#include "keys.h"
 #include "bomb.h"
 
 class MENU
