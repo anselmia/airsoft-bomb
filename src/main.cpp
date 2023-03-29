@@ -14,13 +14,13 @@
 const int pin_plant = 16; // to remove
 
 // Input wires ESP32
-const int wire_pin1 = 14;
-const int wire_pin2 = 27;
-const int wire_pin3 = 15;
+const int wire_pin1 = 15;
+const int wire_pin2 = 2;
+const int wire_pin3 = 14;
 const int wire_pin4 = 17;
-const int wire_pin5 = 19;
-const int wire_pin6 = 35;
-const int wire_pin7 = 34;
+const int wire_pin5 = 5;
+const int wire_pin6 = 14;
+const int wire_pin7 = 27;
 const int wire_pin8 = 26;
 
 DEFUSE_WIRE wires[8] = {
