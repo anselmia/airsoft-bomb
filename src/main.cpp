@@ -10,6 +10,8 @@
 #include "menu.h"
 #include "bomb.h"
 
+#include <I2CKeyPad.h>
+
 // const int pin_plant = 13;
 const int pin_plant = 16; // to remove
 const int pin_key = 3;
@@ -23,6 +25,8 @@ const int wire_pin5 = 5;
 const int wire_pin6 = 14;
 const int wire_pin7 = 27;
 const int wire_pin8 = 26;
+
+I2CKeyPad keyPad(I2CADDR);
 
 DEFUSE_WIRE wires[8] = {
     DEFUSE_WIRE(wire_pin1, 1),
@@ -85,11 +89,19 @@ void setup()
   // put your setup code here, to run once:
   Serial.begin(115200);
   Wire.begin();
+  // with 4x4 keypad
+  // if (keyPad.begin() == false)
+  //{
+  //   Serial.println("\nERROR: cannot communicate to keypad.\nPlease reboot.\n");
+  //   while (1)
+  //     ;
+  // }
+  //
+  // keyPad.loadKeyMap(layout);
   u8g2.begin();
   u8g2.setColorIndex(1);
-  // u8g2.setCursorFont(u8g_font_cursor);
-  // u8g2.setCursorStyle(144);
   u8g2.setFont(u8g2_font_5x7_tr);
+
   delay(100);
 }
 
@@ -104,7 +116,7 @@ void draw_cursor()
 void select_game_mode()
 {
   if (bomb.state == ARMED)
-    u8g2.drawStr(20, 11, F(" !!! BOMBE ARMEE !!!"));
+    u8g2.drawStr(20, 11, " !!! BOMBE ARMEE !!!");
   else
   {
     u8g2.drawStr(30, 11, "MODE DE JEU");
@@ -196,7 +208,7 @@ void wire_mode_screen()
       u8g2.drawStr(40, 33, "...WAITING...");
       break;
     case ONGOING:
-      u8g.drawStr(30, 33, F("...PLANTING..."));
+      u8g2.drawStr(30, 33, "...PLANTING...");
       break;
     case PLANTED:
       sprintf(buf, "%02d:%02d", menu.timer.mins, menu.timer.secs);
@@ -210,7 +222,7 @@ void wire_mode_screen()
           wire_state[i] = 'X';
       }
       sprintf(buf, "%c %c %c %c %c %c %c %c", wire_state[0], wire_state[1], wire_state[2], wire_state[3], wire_state[4], wire_state[5], wire_state[6], wire_state[7]);
-      u8g.drawStr(25, 55, buf);
+      u8g2.drawStr(25, 55, buf);
       break;
     case DEFUSED:
       u8g2.drawStr(42, 33, "DEFUSED");
@@ -245,7 +257,7 @@ void code_mode_screen()
       u8g2.drawStr(33, 33, "... NOT ARMED ...");
       break;
     case ARMED:
-      u8g.drawStr(33, 33, F("... WAITING ..."));
+      u8g2.drawStr(33, 33, "... WAITING ...");
       break;
     case ONGOING:
       u8g2.drawStr(30, 33, "... PLANTING ...");
@@ -332,6 +344,7 @@ void loop()
 {
   bool action = false;
   uint8_t key = ttp229.GetKey16(); // Non Blocking
+  // int key = keyPad.getChar();
   for (int i = 0; i < 16; i++)
   {
     if (keys[i].key == key)
