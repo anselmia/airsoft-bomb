@@ -9,30 +9,50 @@ DEFUSE_WIRE::DEFUSE_WIRE(int pin, int num_wire)
     wirePin = pin;
     num = num_wire;
     used = false;
-    wireState = DISCONNECTED;
-    pinMode(pin, INPUT_PULLUP);
-
-    
+    wireState = CONNECTED;
 }
 
 void DEFUSE_WIRE::readWire()
 {
-    int pinState = digitalRead(wirePin);
-    switch (wireState)
+    float pinState = (analogRead(wirePin) * 3.3) / 4096;
+    Serial.println(pinState);
+    if (num % 2 == 0)
     {
-    case DISCONNECTED:
-        if (pinState == 0)
-            wireState = PLUGGED;
+        switch (wireState)
+        {
+        case DISCONNECTED:
+            if ((pinState <= 0.9 && pinState >= 0.6) || (pinState <= 1.8 && pinState >= 1.5))
+                wireState = PLUGGED;
 
-        break;
-    case PLUGGED:
-        if (pinState == 0)
-            wireState = CONNECTED;
-        else
-            wireState = DISCONNECTED;
-        break;
-    case CONNECTED:
-        if (pinState == 1)
-            wireState = DISCONNECTED;
+            break;
+        case PLUGGED:
+            if (pinState < 0.3 || (pinState <= 1.4 && pinState >= 1.1))
+                wireState = CONNECTED;
+            else
+                wireState = DISCONNECTED;
+            break;
+        case CONNECTED:
+            if (pinState < 0.3 || (pinState <= 1.4 && pinState >= 1.1))
+                wireState = DISCONNECTED;
+        }
+    }
+    else
+    {
+        switch (wireState)
+        {
+        case DISCONNECTED:
+            if ((pinState <= 1.4 && pinState >= 1.1) || (pinState <= 1.8 && pinState >= 1.5))
+                wireState = PLUGGED;
+            break;
+        case PLUGGED:
+            if (pinState < 0.3 || (pinState <= 0.9 && pinState >= 0.6))
+                wireState = CONNECTED;
+            else
+                wireState = DISCONNECTED;
+            break;
+        case CONNECTED:
+            if (pinState < 0.3 || (pinState <= 0.9 && pinState >= 0.6))
+                wireState = DISCONNECTED;
+        }
     }
 }
