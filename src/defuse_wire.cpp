@@ -14,25 +14,29 @@ DEFUSE_WIRE::DEFUSE_WIRE(int pin, int num_wire)
 
 void DEFUSE_WIRE::readWire()
 {
+    char buf[10];
     float pinState = (analogRead(wirePin) * 3.3) / 4096;
-    Serial.println(pinState);
+    sprintf(buf, "fil %d:", num);
+    Serial.print(buf);
+    Serial.print(usage);
+    Serial.println("");
+
     if (num % 2 == 0)
     {
         switch (wireState)
         {
         case DISCONNECTED:
-            if ((pinState <= 0.9 && pinState >= 0.6) || (pinState <= 1.8 && pinState >= 1.5))
+            if (pinState < 0.3 || (pinState <= 1.7 && pinState >= 1.4))
                 wireState = PLUGGED;
-
             break;
         case PLUGGED:
-            if (pinState < 0.3 || (pinState <= 1.4 && pinState >= 1.1))
+            if (pinState < 0.3 || (pinState <= 1.7 && pinState >= 1.4))
                 wireState = CONNECTED;
-            else
+            else if ((pinState <= 2.4 && pinState >= 2.2) || (pinState <= 2.1 && pinState >= 1.8))
                 wireState = DISCONNECTED;
             break;
         case CONNECTED:
-            if (pinState < 0.3 || (pinState <= 1.4 && pinState >= 1.1))
+            if ((pinState <= 2.4 && pinState >= 2.2) || (pinState <= 2.1 && pinState >= 1.8))
                 wireState = DISCONNECTED;
         }
     }
@@ -41,17 +45,17 @@ void DEFUSE_WIRE::readWire()
         switch (wireState)
         {
         case DISCONNECTED:
-            if ((pinState <= 1.4 && pinState >= 1.1) || (pinState <= 1.8 && pinState >= 1.5))
+            if (pinState < 0.3 || (pinState <= 2.1 && pinState >= 1.8))
                 wireState = PLUGGED;
             break;
         case PLUGGED:
-            if (pinState < 0.3 || (pinState <= 0.9 && pinState >= 0.6))
+            if (pinState < 0.3 || (pinState <= 2.1 && pinState >= 1.8))
                 wireState = CONNECTED;
-            else
+            else if ((pinState <= 2.4 && pinState >= 2.2) || (pinState <= 1.7 && pinState >= 1.4))
                 wireState = DISCONNECTED;
             break;
         case CONNECTED:
-            if (pinState < 0.3 || (pinState <= 0.9 && pinState >= 0.6))
+            if ((pinState <= 2.4 && pinState >= 2.2) || (pinState <= 1.7 && pinState >= 1.4))
                 wireState = DISCONNECTED;
         }
     }

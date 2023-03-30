@@ -23,7 +23,7 @@ void BOMB::plant()
     {
         prevMillis = currmillis;
         planting_sec++;
-        if (planting_sec > 10)
+        if (planting_sec > 1)
         {
             state = PLANTED;
             planting_sec = 0;

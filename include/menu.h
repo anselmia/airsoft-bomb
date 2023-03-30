@@ -17,6 +17,5 @@ public:
     void select_action(int key, BOMB &bomb);
     int cursorPos;
     bool reset;
-
 };
 #endif

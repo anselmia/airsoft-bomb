@@ -9,20 +9,25 @@
 #include "menu.h"
 // #include "led.h"
 // #include <I2CKeyPad.h>
-
-const int pin_plant = 34; // External pullup 51K
-const int pin_key = 35;   // External pullup 51K
-const int pin_buzzer = 16;
+// esp
+// const int pin_plant = 22; // External pullup 51K
+// const int pin_key = 21;   // External pullup 51K
+// const int pin_buzzer = 16;
+// Arduino
+const int pin_plant = 6; // External pullup 51K
+const int pin_key = 7;   // External pullup 51K
+const int pin_buzzer = 5;
 
 // Input wires ESP32
-const int wire_pin1 = 22;
-const int wire_pin2 = 16;
-const int wire_pin3 = 21;
-const int wire_pin4 = 14;
-const int wire_pin5 = 15;
-const int wire_pin6 = 17;
-const int wire_pin7 = 26;
-const int wire_pin8 = 27;
+// const int wire_pin1 = 16;
+// const int wire_pin2 = 26;
+// const int wire_pin3 = 27;
+// const int wire_pin4 = 17;
+// arduino
+const int wire_pin1 = 0;
+const int wire_pin2 = 1;
+const int wire_pin3 = 2;
+const int wire_pin4 = 3;
 
 // Keypad
 // I2CKeyPad keyPad(I2CADDR);
@@ -30,13 +35,13 @@ const int wire_pin8 = 27;
 // Defuse wire
 DEFUSE_WIRE wires[8] = {
     DEFUSE_WIRE(wire_pin1, 1),
-    DEFUSE_WIRE(wire_pin2, 2),
-    DEFUSE_WIRE(wire_pin3, 3),
-    DEFUSE_WIRE(wire_pin4, 4),
-    DEFUSE_WIRE(wire_pin5, 5),
-    DEFUSE_WIRE(wire_pin6, 6),
-    DEFUSE_WIRE(wire_pin7, 7),
-    DEFUSE_WIRE(wire_pin8, 8)};
+    DEFUSE_WIRE(wire_pin1, 2),
+    DEFUSE_WIRE(wire_pin2, 3),
+    DEFUSE_WIRE(wire_pin2, 4),
+    DEFUSE_WIRE(wire_pin3, 5),
+    DEFUSE_WIRE(wire_pin3, 6),
+    DEFUSE_WIRE(wire_pin4, 7),
+    DEFUSE_WIRE(wire_pin4, 8)};
 
 // Keys
 KEYS keys[16] = {
@@ -58,9 +63,12 @@ KEYS keys[16] = {
     KEYS(key_hash),
 };
 
-// Keypad
-const int SCL_PIN = 12;
-const int SDO_PIN = 13;
+// Keypad ESP
+// const int SCL_PIN = 12;
+// const int SDO_PIN = 13;
+// Keypad arduino
+const int SCL_PIN = 3;
+const int SDO_PIN = 4;
 TTP229 ttp229 = TTP229(SCL_PIN, SDO_PIN);
 
 // Buttons
@@ -70,8 +78,8 @@ BUTTON button_arm = BUTTON(pin_key);
 // 128*64 I2C Screen
 // U8GLIB_ST7920_128X64_4X u8g(13, 11, 10); // Arduino
 // U8GLIB_ST7920_128X64_4X u8g(13, 11, 10); // ESP 32 ?
-U8G2_ST7565_JLX12864_1_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/18, /* data=*/23, /* cs=*/25, /* dc=*/33, /* reset=*/32); /// good
-
+// U8G2_ST7565_JLX12864_1_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/18, /* data=*/23, /* cs=*/25, /* dc=*/33, /* reset=*/32); /// good esp32
+U8G2_ST7565_JLX12864_1_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/13, /* data=*/11, /* cs=*/10, /* dc=*/9, /* reset=*/8); /// good
 // Menu
 MENU menu = MENU();
 
@@ -130,6 +138,8 @@ void select_game_mode()
 
 void wire_mode()
 {
+  Serial.println(bomb.state);
+  Serial.println(mode_wire.wires_defuse);
   if (bomb.state == PLANTED)
   {
     if (bomb.boom == false && bomb.defused == false)
@@ -364,6 +374,8 @@ void reset_game()
 
 void loop()
 {
+  Serial.println(bomb.state);
+  Serial.println(mode_wire.wires_defuse);
   bool action = false;
   uint8_t key = ttp229.GetKey16(); // to remove
   // int key = keyPad.getChar();
