@@ -2,8 +2,6 @@
 #include "TTP229.h"
 #include <U8g2lib.h>
 #include <Wire.h>
-#include <Arduino.h>
-#include "button.h"
 #include "defuse_wire.h"
 #include "mode_wire.h"
 #include "menu.h"
@@ -91,7 +89,7 @@ MODE_WIRE mode_wire = MODE_WIRE(wires);
 uint8_t defused = 0;
 
 // Other
-char buf[10];
+char buf[20];
 
 void setup()
 {
@@ -138,8 +136,8 @@ void select_game_mode()
 
 void wire_mode()
 {
-  Serial.println(bomb.state);
-  Serial.println(mode_wire.wires_defuse);
+  // Serial.println(bomb.state);
+  // Serial.println(mode_wire.wires_defuse);
   if (bomb.state == PLANTED)
   {
     if (bomb.boom == false && bomb.defused == false)
@@ -367,15 +365,15 @@ void reset_game()
   bomb.input_code[1] = 0;
   bomb.input_code[2] = 0;
   bomb.input_code[3] = 0;
-  mode_wire.wires_defuse = 0;
+  mode_wire = MODE_WIRE(wires);
   for (int i = 0; i < 8; i++)
     wires[i].used = false;
 }
 
 void loop()
 {
-  Serial.println(bomb.state);
-  Serial.println(mode_wire.wires_defuse);
+  for (int i = 0; i < 8; i++)
+    wires[i].readWire();
   bool action = false;
   uint8_t key = ttp229.GetKey16(); // to remove
   // int key = keyPad.getChar();
