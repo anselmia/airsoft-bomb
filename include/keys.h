@@ -9,7 +9,7 @@
 #define I2CADDR 0x26 // Set the Address of the PCF8574
 
 // Set the Key at Use (4x4)
-char layout_keypad[19] = "123A456B789C*0#DNF"; // N = NoKey, F = Fail
+const char layout_keypad[19] = "123A456B789C*0#DNF"; // N = NoKey, F = Fail
 
 // Capacitive keypad
 static const byte key_0 = 14;

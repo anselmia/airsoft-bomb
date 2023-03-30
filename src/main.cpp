@@ -6,28 +6,26 @@
 #include "button.h"
 #include "defuse_wire.h"
 #include "mode_wire.h"
-#include "keys.h"
 #include "menu.h"
-#include "bomb.h"
-#include "led.h"
-#include <I2CKeyPad.h>
+// #include "led.h"
+// #include <I2CKeyPad.h>
 
-// const int pin_plant = 13;
-const int pin_plant = 16; // to remove
-const int pin_key = 3;
+const int pin_plant = 34; // External pullup 51K
+const int pin_key = 35;   // External pullup 51K
+const int pin_buzzer = 16;
 
 // Input wires ESP32
-const int wire_pin1 = 15;
-const int wire_pin2 = 2;
-const int wire_pin3 = 14;
-const int wire_pin4 = 17;
-const int wire_pin5 = 5;
-const int wire_pin6 = 14;
-const int wire_pin7 = 27;
-const int wire_pin8 = 26;
+const int wire_pin1 = 22;
+const int wire_pin2 = 16;
+const int wire_pin3 = 21;
+const int wire_pin4 = 14;
+const int wire_pin5 = 15;
+const int wire_pin6 = 17;
+const int wire_pin7 = 26;
+const int wire_pin8 = 27;
 
 // Keypad
-I2CKeyPad keyPad(I2CADDR);
+// I2CKeyPad keyPad(I2CADDR);
 
 // Defuse wire
 DEFUSE_WIRE wires[8] = {
@@ -82,6 +80,7 @@ BOMB bomb = BOMB();
 
 // Game Mode
 MODE_WIRE mode_wire = MODE_WIRE(wires);
+uint8_t defused = 0;
 
 // Other
 char buf[10];
@@ -148,12 +147,11 @@ void wire_mode()
       {
         bomb.boom = true;
         bomb.state = EXPLODED;
-        mode_wire.wires_defused = 0;
       }
-      if (mode_wire.wires_defused == 4)
+
+      if (mode_wire.wires_defuse == 4)
       {
         bomb.state = DEFUSED;
-        mode_wire.wires_defused = 0;
       }
     }
     menu.timer.updateTime();
@@ -196,7 +194,7 @@ void wire_mode_screen()
   {
   case 1:
     u8g2.drawStr(50, 11, "TIMER");
-    sprintf(buf, "%d:%d", menu.timer.mins, menu.timer.secs);
+    sprintf(buf, "%02d:%02d", menu.timer.mins, menu.timer.secs);
     u8g2.drawStr(48, 33, buf);
     break;
   case 2:
@@ -216,7 +214,7 @@ void wire_mode_screen()
       sprintf(buf, "%02d:%02d", menu.timer.mins, menu.timer.secs);
       u8g2.drawStr(40, 33, buf);
       char wire_state[7];
-      for (int i = 0; i < 6; i++)
+      for (int i = 0; i < 8; i++)
       {
         if (wires[i].used == true)
           wire_state[i] = 'V';
@@ -287,8 +285,8 @@ void code_mode_screen()
 
 void print_progress()
 {
-  Serial.println(bomb.plantmillis);
-  Serial.println(millis());
+  // Serial.println(bomb.plantmillis);
+  // Serial.println(millis());
   u8g2.drawBox(3, 40, map(millis(), bomb.plantmillis, bomb.plantmillis + 10000, 0, 125), 10);
 }
 
@@ -312,34 +310,56 @@ void print_screen()
 
 void readButton(bool action)
 {
-  if (bomb.state < ARMED && action == false)
+  button_arm.readButton();
+  if (action == false)
   {
-    button_arm.readButton();
-    if (button_arm.buttonState == KEY_PRESSED)
-    {
+    if (bomb.state <= ARMED && button_arm.buttonState == KEY_PRESSED)
       bomb.state = ARMED;
-      action = true;
-    }
+    if (button_arm.buttonState != KEY_PRESSED)
+      bomb.state = UNPLANTED;
   }
 
-  if (bomb.state == (bomb.state == ARMED || bomb.state == ONGOING) && action == false)
+  button_plant.readButton();
+  if (button_plant.buttonState == KEY_PRESSED && (bomb.state == ARMED || bomb.state == ONGOING) && menu.actualScreen == 2 && bomb.defused == false && bomb.boom == false)
   {
-    button_plant.readButton();
-
-    if (button_plant.buttonState == KEY_PRESSED && menu.actualScreen == 2 && bomb.defused == false && bomb.boom == false)
+    bomb.plant();
+    print_progress();
+  }
+  else
+  {
+    if (bomb.state == ONGOING && bomb.defused == false && bomb.boom == false)
     {
-      bomb.plant();
-      print_progress();
-    }
-    else
-    {
-      if (bomb.state == ONGOING && bomb.defused == false && bomb.boom == false)
-      {
-        bomb.planting_sec = 0;
-        bomb.state = UNPLANTED;
-      }
+      bomb.planting_sec = 0;
+      bomb.state = UNPLANTED;
     }
   }
+}
+
+void reset_game()
+{
+  menu.reset = false;
+  bomb.state = UNPLANTED;
+  bomb.boom = false;
+  bomb.defused = false;
+  bomb.planting_sec = 0;
+  bomb.plantmillis = 0;
+  menu.actualScreen = 0;
+  menu.cursorPos = 0;
+  menu.game_mode = 0;
+  menu.timer.mins = 20;
+  menu.timer.secs = 0;
+  menu.actualLine = 0;
+  bomb.bombe_code[0] = 0;
+  bomb.bombe_code[1] = 0;
+  bomb.bombe_code[2] = 0;
+  bomb.bombe_code[3] = 0;
+  bomb.input_code[0] = 0;
+  bomb.input_code[1] = 0;
+  bomb.input_code[2] = 0;
+  bomb.input_code[3] = 0;
+  mode_wire.wires_defuse = 0;
+  for (int i = 0; i < 8; i++)
+    wires[i].used = false;
 }
 
 void loop()
@@ -365,4 +385,7 @@ void loop()
   {
     print_screen();
   } while (u8g2.nextPage()); // Select the next page
+
+  if (menu.reset == true)
+    reset_game();
 }

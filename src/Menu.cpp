@@ -6,6 +6,7 @@ MENU::MENU()
     actualScreen = 0;
     actualLine = 0;
     cursorPos = 0;
+    reset = false;
 }
 
 void MENU::select_action(int key, BOMB &bomb)
@@ -66,7 +67,6 @@ void MENU::select_action(int key, BOMB &bomb)
             break;
         case key_4:
         case key_6:
-            Serial.println("cursor");
             if (cursorPos == 0)
                 cursorPos = 1;
             else
@@ -82,7 +82,7 @@ void MENU::select_action(int key, BOMB &bomb)
             case 1:
                 actualScreen = 0;
                 cursorPos = 0;
-                reset_game(bomb);
+                reset = true;
                 break;
             case 2:
                 actualScreen = 3;
@@ -118,10 +118,8 @@ void MENU::select_action(int key, BOMB &bomb)
                 }
             }
             break;
-        case key_hash:
-            actualScreen = 0;
-            cursorPos = 0;
-            reset_game(bomb);
+        case key_hash:            
+            reset = true;
             break;
         }
         break;
@@ -149,29 +147,8 @@ void MENU::select_action(int key, BOMB &bomb)
             cursorPos = 0;
             break;
         case key_hash:
-            reset_game(bomb);
+            reset = true;
         }
         break;
     }
-}
-
-void MENU::reset_game(BOMB &bomb)
-{
-    bomb.state = UNPLANTED;
-    bomb.boom = false;
-    bomb.defused = false;
-    bomb.planting_sec = 0;
-    bomb.plantmillis = 0;
-    game_mode = 0;
-    timer.mins = 20;
-    timer.secs = 0;
-    actualLine = 0;
-    bomb.bombe_code[0] = 0;
-    bomb.bombe_code[1] = 0;
-    bomb.bombe_code[2] = 0;
-    bomb.bombe_code[3] = 0;
-    bomb.input_code[0] = 0;
-    bomb.input_code[1] = 0;
-    bomb.input_code[2] = 0;
-    bomb.input_code[3] = 0;
 }

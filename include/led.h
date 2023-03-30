@@ -6,7 +6,7 @@
 #define NUM_LEDS 10
 #define LED_TYPE WS2811
 #define COLOR_ORDER GRB
-#define DATA_PIN 3
+#define DATA_PIN 19
 // #define CLK_PIN       4
 #define VOLTS 5
 #define MAX_MA 400
@@ -113,7 +113,7 @@ const TProgmemRGBPalette16 Ice_p FL_PROGMEM =
         Ice_Blue1, Ice_Blue1, Ice_Blue1, Ice_Blue1,
         Ice_Blue2, Ice_Blue2, Ice_Blue2, Ice_Blue3};
 
-const TProgmemRGBPalette16 *ActivePaletteList[] = {
+inline const TProgmemRGBPalette16 *ActivePaletteList[] = {
     &RetroC9_p,
     &BlueWhite_p,
     &RainbowColors_p,

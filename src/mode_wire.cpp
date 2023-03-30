@@ -23,8 +23,7 @@ MODE_WIRE::MODE_WIRE(DEFUSE_WIRE (&wires)[8])
         } while (!unique);
         wires[i].usage = newitem;
     }
-
-    wires_defused = 0;
+    wires_defuse = 0;
 }
 
 void MODE_WIRE::disconnect_cable(DEFUSE_WIRE wire, TIMER &timer)
@@ -33,7 +32,7 @@ void MODE_WIRE::disconnect_cable(DEFUSE_WIRE wire, TIMER &timer)
     switch (action)
     {
     case DEFUSE:
-        Defuse();
+        defuse();
         break;
     case PENALTY:
         timer.time_penalty(2);
@@ -66,7 +65,7 @@ void MODE_WIRE::get_wire_usage(DEFUSE_WIRE wire)
         action = BOOM;
 }
 
-void MODE_WIRE::Defuse()
+void MODE_WIRE::defuse()
 {
-    wires_defused++;
+    wires_defuse++;
 }

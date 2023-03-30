@@ -16,6 +16,7 @@ public:
     TIMER timer = TIMER(0, 20);
     void select_action(int key, BOMB &bomb);
     int cursorPos;
-    void reset_game(BOMB &bomb);
+    bool reset;
+
 };
 #endif
