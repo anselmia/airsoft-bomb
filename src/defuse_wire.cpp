@@ -63,17 +63,17 @@ void DEFUSE_WIRE::readWire()
         switch (wireState)
         {
         case DISCONNECTED:
-            if (pinState < 0.3 || (pinState <= 1.4 && pinState >= 1.2))
+            if (pinState < 0.3 || (pinState <= 1.5 && pinState >= 1))
                 wireState = PLUGGED;
             break;
         case PLUGGED:
-            if (pinState < 0.3 || (pinState <= 1.4 && pinState >= 1.2))
+            if (pinState < 0.3 || (pinState <= 1.5 && pinState >= 1))
                 wireState = CONNECTED;
-            else if ((pinState <= 1.65 && pinState >= 1.5) || (pinState <= 2 && pinState >= 1.7))
+            else if ((pinState <= 1.8 && pinState >= 1.6) || (pinState <= 2.4 && pinState >= 1.9))
                 wireState = DISCONNECTED;
             break;
         case CONNECTED:
-            if ((pinState <= 1.65 && pinState >= 1.5) || (pinState <= 2 && pinState >= 1.7))
+            if ((pinState <= 1.8 && pinState >= 1.6) || (pinState <= 2.4 && pinState >= 1.9))
                 wireState = DISCONNECTED;
         }
     }
@@ -82,17 +82,17 @@ void DEFUSE_WIRE::readWire()
         switch (wireState)
         {
         case DISCONNECTED:
-            if (pinState < 0.3 || (pinState <= 1.6 && pinState >= 1.4))
+            if (pinState < 0.3 || (pinState <= 1.8 && pinState >= 1.6))
                 wireState = PLUGGED;
             break;
         case PLUGGED:
-            if (pinState < 0.3 || (pinState <= 1.6 && pinState >= 1.4))
+            if (pinState < 0.3 || (pinState <= 1.8 && pinState >= 1.6))
                 wireState = CONNECTED;
-            else if ((pinState <= 1.4 && pinState >= 1.2) || (pinState <= 2 && pinState >= 1.7))
+            else if ((pinState <= 1.5 && pinState >= 1) || (pinState <= 2.4 && pinState >= 1.9))
                 wireState = DISCONNECTED;
             break;
         case CONNECTED:
-            if ((pinState <= 1.4 && pinState >= 1.2) || (pinState <= 2 && pinState >= 1.7))
+            if ((pinState <= 1.5 && pinState >= 1) || (pinState <= 2.4 && pinState >= 1.9))
                 wireState = DISCONNECTED;
         }
     }

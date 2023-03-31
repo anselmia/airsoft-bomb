@@ -9,7 +9,7 @@ MENU::MENU()
     reset = false;
 }
 
-void MENU::select_action(int key, BOMB &bomb)
+void MENU::select_action(char key, BOMB &bomb)
 {
     switch (actualScreen)
     {
@@ -118,7 +118,7 @@ void MENU::select_action(int key, BOMB &bomb)
                 }
             }
             break;
-        case key_hash:            
+        case key_hash:
             reset = true;
             break;
         }
@@ -143,8 +143,11 @@ void MENU::select_action(int key, BOMB &bomb)
             cursorPos++;
             break;
         case key_star:
-            actualScreen = 1;
-            cursorPos = 0;
+            if (cursorPos >= 3)
+            {
+                actualScreen = 1;
+                cursorPos = 0;
+            }
             break;
         case key_hash:
             reset = true;

@@ -14,7 +14,7 @@ public:
     int actualScreen;
     int actualLine;
     TIMER timer = TIMER(0, 20);
-    void select_action(int key, BOMB &bomb);
+    void select_action(char key, BOMB &bomb);
     int cursorPos;
     bool reset;
 };

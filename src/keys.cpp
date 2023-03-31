@@ -1,31 +1,13 @@
 #include "keys.h"
 
-KEYS::KEYS(int k)
+KEYS::KEYS(char k)
 {
     key = k;
     keyState = NOT_PRESSED;
 }
 
-// Capa
-// void KEYS::readKey()
-//{
-//    ttp229.readKeys();
-//    if (key == ttp229.getKey())
-//    {
-//        switch (buttonState)
-//        {
-//        case NOT_PRESSED:
-//            buttonState = PUSHED;
-//        case PUSHED:
-//            buttonState = KEY_PRESSED;
-//        }
-//    }
-//    else
-//        buttonState = NOT_PRESSED;
-//}
-
 // 4x4
-void KEYS::readKey(int k)
+void KEYS::readKey(char k)
 {
     if (key == k)
     {

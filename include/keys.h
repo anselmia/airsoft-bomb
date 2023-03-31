@@ -5,28 +5,10 @@
 
 #include <I2CKeyPad.h>
 
-#define I2CADDR 0x38 // Set the Address of the PCF8574
+#define I2CADDR 0x20 // Set the Address of the PCF8574
 
 // Set the Key at Use (4x4)
 inline char layout_keypad[19] = "123A456B789C*0#DNF"; // N = NoKey, F = Fail
-
-// Capacitive keypad
-// static const byte key_0 = 14;
-// static const byte key_1 = 1;
-// static const byte key_2 = 2;
-// static const byte key_3 = 3;
-// static const byte key_4 = 5;
-// static const byte key_5 = 6;
-// static const byte key_6 = 7;
-// static const byte key_7 = 9;
-// static const byte key_8 = 10;
-// static const byte key_9 = 11;
-// static const byte key_A = 4;
-// static const byte key_B = 8;
-// static const byte key_C = 12;
-// static const byte key_D = 16;
-// static const byte key_star = 13;
-// static const byte key_hash = 15;
 
 // Keyboard 4x4
 static const byte key_0 = '0';
@@ -68,11 +50,10 @@ class KEYS
 {
 private:
 public:
-    KEYS(int k);
-    int key;
+    KEYS(char k);
+    char key;
     byte keyState;
-    // void readButton(int selected_key);
-    void readKey(int k);
+    void readKey(char k);
 };
 
 #endif

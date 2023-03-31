@@ -9,11 +9,10 @@ static const byte CONNECTED = 2;
 class DEFUSE_WIRE
 {
 private:
-    int wirePin;
-
 public:
     DEFUSE_WIRE();
     DEFUSE_WIRE(int pin, int num_wire);
+    int wirePin;
     int num;
     int usage; // wire functionality
     bool used;

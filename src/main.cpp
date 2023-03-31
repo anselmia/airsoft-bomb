@@ -1,5 +1,4 @@
 #include <SPI.h>
-#include "TTP229.h"
 #include <U8g2lib.h>
 #include <Wire.h>
 #include "defuse_wire.h"
@@ -12,8 +11,8 @@
 // const int pin_key = 21;   // External pullup 51K
 // const int pin_buzzer = 16;
 // Arduino
-const int pin_plant = 6; // External pullup 51K
-const int pin_key = 7;   // External pullup 51K
+const int pin_plant = 6;
+const int pin_key = 7;
 const int pin_buzzer = 5;
 
 // Input wires ESP32
@@ -91,6 +90,9 @@ uint8_t defused = 0;
 // Other
 char buf[20];
 
+// Buzzer
+unsigned long tone_stop = 0;
+
 void setup()
 {
   Serial.begin(115200);
@@ -107,7 +109,7 @@ void setup()
 
   // Initialize buzzer
   pinMode(pin_buzzer, OUTPUT);
-  tone(pin_buzzer, 500, 1000);
+  digitalWrite(pin_buzzer, HIGH);
 
   // Initialize screen
   u8g2.begin();
@@ -115,6 +117,19 @@ void setup()
   u8g2.setFont(u8g2_font_6x10_tr);
 
   delay(100);
+}
+
+void start_tone(unsigned long time)
+{
+  tone_stop = millis() + time;
+}
+
+void tone_buzzer()
+{
+  if (tone_stop > millis())
+    digitalWrite(pin_buzzer, LOW);
+  else
+    digitalWrite(pin_buzzer, HIGH);
 }
 
 void draw_cursor()
@@ -141,8 +156,6 @@ void select_game_mode()
 
 void wire_mode()
 {
-  // Serial.println(bomb.state);
-  // Serial.println(mode_wire.wires_defuse);
   if (bomb.state == PLANTED)
   {
     if (bomb.boom == false && bomb.defused == false)
@@ -160,11 +173,13 @@ void wire_mode()
       {
         bomb.boom = true;
         bomb.state = EXPLODED;
+        start_tone(50000);
       }
 
       if (mode_wire.wires_defuse == 4)
       {
         bomb.state = DEFUSED;
+        start_tone(100);
       }
     }
     menu.timer.updateTime();
@@ -190,11 +205,13 @@ void code_mode()
       if (menu.cursorPos == 4)
       {
         bomb.state = DEFUSED;
+        start_tone(100);
       }
       if (menu.timer.mins == 0 && menu.timer.secs == 0)
       {
         bomb.boom = true;
         bomb.state = EXPLODED;
+        start_tone(50000);
       }
       menu.timer.updateTime();
     }
@@ -254,7 +271,7 @@ void code_mode_screen()
   {
   case 3:
     u8g2.drawStr(50, 11, "CODE");
-    sprintf(buf, "%d %d %d %d", bomb.bombe_code[0], bomb.bombe_code[1], bomb.bombe_code[2], bomb.bombe_code[3]);
+    sprintf(buf, "%c %c %c %c", bomb.bombe_code[0], bomb.bombe_code[1], bomb.bombe_code[2], bomb.bombe_code[3]);
     u8g2.drawStr(43, 33, buf);
     break;
   case 1:
@@ -278,16 +295,16 @@ void code_mode_screen()
     case PLANTED:
       sprintf(buf, "%02d:%02d", menu.timer.mins, menu.timer.secs);
       u8g2.drawStr(50, 33, buf);
-      sprintf(buf, "%d %d %d %d", bomb.input_code[0], bomb.input_code[1], bomb.input_code[2], bomb.input_code[3]);
+      sprintf(buf, "%c %c %c %c", bomb.input_code[0], bomb.input_code[1], bomb.input_code[2], bomb.input_code[3]);
       u8g2.drawStr(46, 55, buf);
       break;
     case DEFUSED:
-      sprintf(buf, "%d %d %d %d", bomb.input_code[0], bomb.input_code[1], bomb.input_code[2], bomb.input_code[3]);
+      sprintf(buf, "%c %c %c %c", bomb.input_code[0], bomb.input_code[1], bomb.input_code[2], bomb.input_code[3]);
       u8g2.drawStr(46, 55, buf);
       u8g2.drawStr(44, 33, "DEFUSED");
       break;
     case EXPLODED:
-      sprintf(buf, "%d %d %d %d", bomb.input_code[0], bomb.input_code[1], bomb.input_code[2], bomb.input_code[3]);
+      sprintf(buf, "%c %c %c %c", bomb.input_code[0], bomb.input_code[1], bomb.input_code[2], bomb.input_code[3]);
       u8g2.drawStr(46, 55, buf);
       u8g2.drawStr(20, 33, "BOOOOOOOOOOOOM");
       break;
@@ -324,10 +341,10 @@ void readButton(bool action)
   button_arm.readButton();
   if (action == false)
   {
-    if (bomb.state <= ARMED && button_arm.buttonState == PRESSED)
+    if (bomb.state < ARMED && button_arm.buttonState == PRESSED)
     {
       bomb.state = ARMED;
-      tone(pin_buzzer, 500, 100);
+      start_tone(100);
     }
     if (button_arm.buttonState != PRESSED)
       bomb.state = UNPLANTED;
@@ -338,7 +355,7 @@ void readButton(bool action)
   {
     bomb.plant();
     print_progress();
-    tone(pin_buzzer, 500, 100);
+    // tone(pin_buzzer, 500, 100);
   }
   else
   {
@@ -352,6 +369,7 @@ void readButton(bool action)
 
 void reset_game()
 {
+  tone_stop = 0;
   menu.reset = false;
   bomb.state = UNPLANTED;
   bomb.boom = false;
@@ -364,23 +382,36 @@ void reset_game()
   menu.timer.mins = 20;
   menu.timer.secs = 0;
   menu.actualLine = 0;
-  bomb.bombe_code[0] = 0;
-  bomb.bombe_code[1] = 0;
-  bomb.bombe_code[2] = 0;
-  bomb.bombe_code[3] = 0;
-  bomb.input_code[0] = 0;
-  bomb.input_code[1] = 0;
-  bomb.input_code[2] = 0;
-  bomb.input_code[3] = 0;
+  bomb.bombe_code[0] = '*';
+  bomb.bombe_code[1] = '*';
+  bomb.bombe_code[2] = '*';
+  bomb.bombe_code[3] = '*';
+  bomb.input_code[0] = '*';
+  bomb.input_code[1] = '*';
+  bomb.input_code[2] = '*';
+  bomb.input_code[3] = '*';
   mode_wire = MODE_WIRE(wires);
   for (int i = 0; i < 8; i++)
     wires[i].used = false;
 }
 
+void debug_wire()
+{
+  for (int i = 0; i < 8; i++)
+  {
+    float pinState = (analogRead(wires[i].wirePin) * 3.3) / 1024; // Arduino
+    sprintf(buf, "Fil:%d|use:%d|V:", wires[i].num, wires[i].usage);
+    Serial.print(buf);
+    Serial.print(pinState);
+    Serial.println("");
+  }
+}
+
 void loop()
 {
+  // debug_wire();
+
   bool action = false;
-  // uint8_t key = ttp229.GetKey16(); // to remove
   int key = keyPad.getChar();
   for (int i = 0; i < 16; i++)
   {
@@ -388,11 +419,11 @@ void loop()
     if (keys[i].keyState == PRESSED)
     {
       menu.select_action(keys[i].key, bomb);
+      delay(500); // slow keypad
       action = true;
       break;
     }
   }
-  // ttp229.set_Key16_to_0();
 
   readButton(action);
 
@@ -400,8 +431,13 @@ void loop()
   do
   {
     print_screen();
+
   } while (u8g2.nextPage()); // Select the next page
 
   if (menu.reset == true)
     reset_game();
+
+  tone_buzzer();
+  Serial.println(tone_stop);
+  Serial.println(millis());
 }
