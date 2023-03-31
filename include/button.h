@@ -4,7 +4,7 @@
 
 static const byte NOT_PRESSED = 0;
 static const byte PUSHED = 1;
-static const byte KEY_PRESSED = 2;
+static const byte PRESSED = 2;
 
 class BUTTON
 {

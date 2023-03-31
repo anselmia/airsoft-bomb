@@ -6,7 +6,7 @@
 #include "mode_wire.h"
 #include "menu.h"
 // #include "led.h"
-// #include <I2CKeyPad.h>
+#include <I2CKeyPad.h>
 // esp
 // const int pin_plant = 22; // External pullup 51K
 // const int pin_key = 21;   // External pullup 51K
@@ -28,7 +28,7 @@ const int wire_pin3 = 2;
 const int wire_pin4 = 3;
 
 // Keypad
-// I2CKeyPad keyPad(I2CADDR);
+I2CKeyPad keyPad(I2CADDR);
 
 // Defuse wire
 DEFUSE_WIRE wires[8] = {
@@ -65,9 +65,9 @@ KEYS keys[16] = {
 // const int SCL_PIN = 12;
 // const int SDO_PIN = 13;
 // Keypad arduino
-const int SCL_PIN = 3;
-const int SDO_PIN = 4;
-TTP229 ttp229 = TTP229(SCL_PIN, SDO_PIN);
+// const int SCL_PIN = 3;
+// const int SDO_PIN = 4;
+// TTP229 ttp229 = TTP229(SCL_PIN, SDO_PIN);
 
 // Buttons
 BUTTON button_plant = BUTTON(pin_plant);
@@ -77,7 +77,7 @@ BUTTON button_arm = BUTTON(pin_key);
 // U8GLIB_ST7920_128X64_4X u8g(13, 11, 10); // Arduino
 // U8GLIB_ST7920_128X64_4X u8g(13, 11, 10); // ESP 32 ?
 // U8G2_ST7565_JLX12864_1_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/18, /* data=*/23, /* cs=*/25, /* dc=*/33, /* reset=*/32); /// good esp32
-U8G2_ST7565_JLX12864_1_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/13, /* data=*/11, /* cs=*/10, /* dc=*/9, /* reset=*/8); /// good
+U8G2_ST7565_JLX12864_1_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/13, /* data=*/11, /* cs=*/10, /* dc=*/9, /* reset=*/8); /// good arduino
 // Menu
 MENU menu = MENU();
 
@@ -93,21 +93,26 @@ char buf[20];
 
 void setup()
 {
-  // put your setup code here, to run once:
   Serial.begin(115200);
   Wire.begin();
-  // with 4x4 keypad
-  // if (keyPad.begin() == false)
-  //{
-  //   Serial.println("\nERROR: cannot communicate to keypad.\nPlease reboot.\n");
-  //   while (1)
-  //     ;
-  // }
-  //
-  // keyPad.loadKeyMap(layout_keypad);
+
+  // Initialize Keypad
+  if (keyPad.begin() == false)
+  {
+    Serial.println("\nERROR: cannot communicate to keypad.\nPlease reboot.\n");
+    while (1)
+      ;
+  }
+  keyPad.loadKeyMap(layout_keypad);
+
+  // Initialize buzzer
+  pinMode(pin_buzzer, OUTPUT);
+  tone(pin_buzzer, 500, 1000);
+
+  // Initialize screen
   u8g2.begin();
   u8g2.setColorIndex(1);
-  u8g2.setFont(u8g2_font_5x7_tr);
+  u8g2.setFont(u8g2_font_6x10_tr);
 
   delay(100);
 }
@@ -115,9 +120,9 @@ void setup()
 void draw_cursor()
 {
   if (menu.actualLine == 0)
-    u8g2.drawBox(12, 22, 5, 7);
+    u8g2.drawBox(12, 22, 5, 10);
   else
-    u8g2.drawBox(12, 33, 5, 7);
+    u8g2.drawBox(12, 33, 5, 10);
 }
 
 void select_game_mode()
@@ -293,8 +298,6 @@ void code_mode_screen()
 
 void print_progress()
 {
-  // Serial.println(bomb.plantmillis);
-  // Serial.println(millis());
   u8g2.drawBox(3, 40, map(millis(), bomb.plantmillis, bomb.plantmillis + 10000, 0, 125), 10);
 }
 
@@ -321,17 +324,21 @@ void readButton(bool action)
   button_arm.readButton();
   if (action == false)
   {
-    if (bomb.state <= ARMED && button_arm.buttonState == KEY_PRESSED)
+    if (bomb.state <= ARMED && button_arm.buttonState == PRESSED)
+    {
       bomb.state = ARMED;
-    if (button_arm.buttonState != KEY_PRESSED)
+      tone(pin_buzzer, 500, 100);
+    }
+    if (button_arm.buttonState != PRESSED)
       bomb.state = UNPLANTED;
   }
 
   button_plant.readButton();
-  if (button_plant.buttonState == KEY_PRESSED && (bomb.state == ARMED || bomb.state == ONGOING) && menu.actualScreen == 2 && bomb.defused == false && bomb.boom == false)
+  if (button_plant.buttonState == PRESSED && (bomb.state == ARMED || bomb.state == ONGOING) && menu.actualScreen == 2 && bomb.defused == false && bomb.boom == false)
   {
     bomb.plant();
     print_progress();
+    tone(pin_buzzer, 500, 100);
   }
   else
   {
@@ -372,21 +379,20 @@ void reset_game()
 
 void loop()
 {
-  for (int i = 0; i < 8; i++)
-    wires[i].readWire();
   bool action = false;
-  uint8_t key = ttp229.GetKey16(); // to remove
-  // int key = keyPad.getChar();
+  // uint8_t key = ttp229.GetKey16(); // to remove
+  int key = keyPad.getChar();
   for (int i = 0; i < 16; i++)
   {
-    if (keys[i].key == key)
+    keys[i].readKey(key);
+    if (keys[i].keyState == PRESSED)
     {
       menu.select_action(keys[i].key, bomb);
       action = true;
       break;
     }
   }
-  ttp229.set_Key16_to_0();
+  // ttp229.set_Key16_to_0();
 
   readButton(action);
 

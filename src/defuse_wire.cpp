@@ -14,17 +14,10 @@ DEFUSE_WIRE::DEFUSE_WIRE(int pin, int num_wire)
 
 void DEFUSE_WIRE::readWire()
 {
-    char buf[10];
     // float pinState = (analogRead(wirePin) * 3.3) / 4096; ESP
-    float pinState = (analogRead(wirePin) * 3.3) / 1024;
-    sprintf(buf, "fil %d:", num);
+    float pinState = (analogRead(wirePin) * 3.3) / 1024; // Arduino
 
-    Serial.print(buf);
-    Serial.print(usage);
-    Serial.print("  ");
-    Serial.print(pinState);
-    Serial.println("");
-
+    // ESP
     // if (num % 2 == 0)
     // {
     //    switch (wireState)
@@ -63,6 +56,8 @@ void DEFUSE_WIRE::readWire()
     //            wireState = DISCONNECTED;
     //    }
     // }
+
+    // Arduino
     if (num % 2 == 0)
     {
         switch (wireState)

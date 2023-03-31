@@ -3,11 +3,11 @@
 KEYS::KEYS(int k)
 {
     key = k;
-    buttonState = NOT_PRESSED;
+    keyState = NOT_PRESSED;
 }
 
-// to uncomment with keyboard
-// void KEY::readButton()
+// Capa
+// void KEYS::readKey()
 //{
 //    ttp229.readKeys();
 //    if (key == ttp229.getKey())
@@ -23,6 +23,23 @@ KEYS::KEYS(int k)
 //    else
 //        buttonState = NOT_PRESSED;
 //}
+
+// 4x4
+void KEYS::readKey(int k)
+{
+    if (key == k)
+    {
+        switch (keyState)
+        {
+        case NOT_PRESSED:
+            keyState = PUSHED;
+        case PUSHED:
+            keyState = PRESSED;
+        }
+    }
+    else
+        keyState = NOT_PRESSED;
+}
 
 // to remove
 // void KEY::readButton(int selectedkey)
