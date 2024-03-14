@@ -76,8 +76,8 @@ BUTTON button_arm = BUTTON(pin_key);
 // U8GLIB_ST7920_128X64_4X u8g(13, 11, 10); // Arduino
 // U8GLIB_ST7920_128X64_4X u8g(13, 11, 10); // ESP 32 ?
 // U8G2_ST7565_JLX12864_1_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/18, /* data=*/23, /* cs=*/25, /* dc=*/33, /* reset=*/32); /// good esp32
-U8G2_ST7565_JLX12864_1_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/13, /* data=*/11, /* cs=*/10, /* dc=*/9, /* reset=*/8); /// good arduino
-// Menu
+U8G2_ST7565_JLX12864_1_4W_SW_SPI u8g2(U8G2_R0, /* scl=*/13, /* si=*/11, /* cs=*/10, /* rs=*/9, /* rse=*/8); /// good arduino
+// Menu 
 MENU menu = MENU();
 
 // Bomb
